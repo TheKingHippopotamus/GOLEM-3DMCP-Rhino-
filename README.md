@@ -15,6 +15,35 @@ GOLEM-3DMCP implements the [Model Context Protocol](https://modelcontextprotocol
 
 ---
 
+## Demo — City Built Entirely by Claude
+
+> An entire city generated in Rhino 8 through GOLEM-3DMCP — roads, skyscrapers, houses, trees, people, vehicles, a stadium, bridge, ferris wheel, harbor, wind turbines, and a floating GOLEM hologram. All created by Claude Code using natural language commands.
+
+[![Watch the demo](https://img.youtube.com/vi/GoWN9vGlWCs/maxresdefault.jpg)](https://youtu.be/GoWN9vGlWCs)
+<p align="center"><strong>Watch the full demo video on YouTube</strong></p>
+
+<p align="center">
+  <img src="screenshots/city_wide.png" alt="GOLEM City — Wide Overview" width="800"/>
+</p>
+<p align="center"><em>Full city overview — ground, roads, buildings, park, harbor, sky</em></p>
+
+<p align="center">
+  <img src="screenshots/city_skyline.png" alt="GOLEM City — Skyline" width="800"/>
+</p>
+<p align="center"><em>Skyline view — skyscrapers, bridge, wind turbines, floating GOLEM hologram</em></p>
+
+<p align="center">
+  <img src="screenshots/city_monument.png" alt="GOLEM City — Monument" width="800"/>
+</p>
+<p align="center"><em>Close-up — GOLEM monument plaza, residential buildings, fountain</em></p>
+
+<p align="center">
+  <img src="screenshots/city_street.png" alt="GOLEM City — Street Level" width="800"/>
+</p>
+<p align="center"><em>Street level — vehicles, people, street lamps, stadium, harbor with boats</em></p>
+
+---
+
 ## Architecture
 
 ```
