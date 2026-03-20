@@ -1,0 +1,23 @@
+[project]
+name = "golem-3dmcp"
+version = "0.1.0"
+description = "GOLEM-3DMCP: Full-access MCP server connecting Claude Code to Rhinoceros 3D"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.0.0",
+    "pydantic>=2.0.0",
+    "httpx>=0.24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mcp_server", "rhino_plugin"]
