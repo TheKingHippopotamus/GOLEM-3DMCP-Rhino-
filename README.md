@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://pypi.org/project/golem-3dmcp/"><img src="https://img.shields.io/pypi/v/golem-3dmcp.svg" alt="PyPI"></a>
-  <a href="https://pypi.org/project/golem-3dmcp/"><img src="https://img.shields.io/pypi/dm/golem-3dmcp.svg" alt="Downloads"></a>
+  <a href="https://pypi.org/project/golem-3dmcp/"><img src="https://img.shields.io/pypi/status/golem-3dmcp.svg" alt="Status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
   <a href="https://www.rhino3d.com/"><img src="https://img.shields.io/badge/Rhino-8.x-blue.svg" alt="Rhino 8"></a>
   <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.10+-green.svg" alt="Python 3.10+"></a>
