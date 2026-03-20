@@ -20,10 +20,10 @@ Registered tools:
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
-from golem_3dmcp.server import mcp
 from golem_3dmcp.connection import get_connection
+from golem_3dmcp.server import mcp
 
 
 def _send(method: str, params: dict) -> dict:
@@ -42,8 +42,8 @@ def create_box(
     width: float = 1.0,
     depth: float = 1.0,
     height: float = 1.0,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a rectangular box (cuboid) in the Rhino document.
@@ -79,8 +79,8 @@ def create_sphere(
     center_y: float = 0.0,
     center_z: float = 0.0,
     radius: float = 1.0,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a sphere in the Rhino document.
@@ -109,8 +109,8 @@ def create_cylinder(
     height: float = 1.0,
     radius: float = 1.0,
     cap: bool = True,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a cylinder in the Rhino document.
@@ -145,8 +145,8 @@ def create_cone(
     radius: float = 1.0,
     height: float = 1.0,
     cap: bool = True,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a cone aligned with the world Z axis.
@@ -178,8 +178,8 @@ def create_torus(
     center_z: float = 0.0,
     major_radius: float = 2.0,
     minor_radius: float = 0.5,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a torus in the world XY plane.
@@ -215,8 +215,8 @@ def create_line(
     end_x: float = 1.0,
     end_y: float = 0.0,
     end_z: float = 0.0,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a straight line curve.
@@ -243,8 +243,8 @@ def create_arc(
     radius: float = 1.0,
     start_angle: float = 0.0,
     end_angle: float = 90.0,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create an arc in the world XY plane.
@@ -273,8 +273,8 @@ def create_circle(
     center_y: float = 0.0,
     center_z: float = 0.0,
     radius: float = 1.0,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a full circle curve in the world XY plane.
@@ -297,8 +297,8 @@ def create_circle(
 def create_polyline(
     points: list[dict[str, float]],
     closed: bool = False,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a polyline through an ordered list of points.
@@ -324,9 +324,9 @@ def create_nurbs_curve(
     points: list[dict[str, float]],
     degree: int = 3,
     interpolate: bool = True,
-    weights: Optional[list[float]] = None,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    weights: list[float] | None = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a NURBS curve through (or near) a list of points.
@@ -362,8 +362,8 @@ def create_point(
     x: float = 0.0,
     y: float = 0.0,
     z: float = 0.0,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a point object in the Rhino document.
@@ -388,8 +388,8 @@ def create_text(
     position_z: float = 0.0,
     height: float = 1.0,
     font: str = "Arial",
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a text annotation object in the Rhino document.

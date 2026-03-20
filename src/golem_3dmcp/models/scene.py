@@ -10,12 +10,9 @@ tools that create or modify layers and object attributes.
 
 from __future__ import annotations
 
-from typing import List, Optional
-
 from pydantic import BaseModel, Field
 
 from .common import BoundingBox, Color
-
 
 # ---------------------------------------------------------------------------
 # Document / file level
@@ -26,7 +23,7 @@ class DocumentInfo(BaseModel):
     High-level information about the currently open Rhino document.
     """
 
-    file_path: Optional[str] = Field(
+    file_path: str | None = Field(
         default=None,
         description="Absolute path of the .3dm file on disk, or ``None`` if unsaved.",
     )
@@ -74,7 +71,7 @@ class LayerInfo(BaseModel):
     color: Color = Field(default_factory=Color)
     visible: bool = Field(default=True)
     locked: bool = Field(default=False)
-    parent: Optional[str] = Field(
+    parent: str | None = Field(
         default=None,
         description="Full path of the parent layer, or ``None`` for top-level layers.",
     )
@@ -94,10 +91,10 @@ class LayerCreateParams(BaseModel):
     """Parameters for creating a new layer."""
 
     name: str = Field(description="Layer name.  Use '::' as a separator for nested layers.")
-    color: Optional[Color] = Field(default=None)
+    color: Color | None = Field(default=None)
     visible: bool = Field(default=True)
     locked: bool = Field(default=False)
-    parent: Optional[str] = Field(
+    parent: str | None = Field(
         default=None,
         description="Full path of the parent layer.  Creates top-level layer if omitted.",
     )
@@ -119,21 +116,21 @@ class ObjectInfo(BaseModel):
         description="Geometry type: 'brep', 'curve', 'mesh', 'point', "
                     "'extrusion', 'subd', 'annotation', etc.",
     )
-    layer: Optional[str] = Field(
+    layer: str | None = Field(
         default=None,
         description="Full layer path the object lives on.",
     )
-    name: Optional[str] = Field(
+    name: str | None = Field(
         default=None,
         description="Object name (may be empty string if unnamed).",
     )
-    color: Optional[Color] = Field(
+    color: Color | None = Field(
         default=None,
         description="Object colour override.  ``None`` means 'by layer'.",
     )
     visible: bool = Field(default=True)
     locked: bool = Field(default=False)
-    bounding_box: Optional[BoundingBox] = Field(default=None)
+    bounding_box: BoundingBox | None = Field(default=None)
     user_text: dict = Field(
         default_factory=dict,
         description="All user-text key-value pairs attached to the object.",
@@ -148,15 +145,15 @@ class ObjectFilter(BaseModel):
     Multiple set fields are combined with AND logic.
     """
 
-    layer: Optional[str] = Field(
+    layer: str | None = Field(
         default=None,
         description="Return only objects on this layer (full path match).",
     )
-    object_type: Optional[str] = Field(
+    object_type: str | None = Field(
         default=None,
         description="Return only objects of this geometry type.",
     )
-    name: Optional[str] = Field(
+    name: str | None = Field(
         default=None,
         description="Return only objects whose name contains this substring.",
     )
@@ -179,17 +176,17 @@ class ViewInfo(BaseModel):
 
     name: str
     is_perspective: bool = False
-    camera_location: Optional[List[float]] = Field(
+    camera_location: list[float] | None = Field(
         default=None,
         description="[x, y, z] of the camera position.",
     )
-    camera_target: Optional[List[float]] = Field(
+    camera_target: list[float] | None = Field(
         default=None,
         description="[x, y, z] of the camera target.",
     )
-    display_mode: Optional[str] = None
-    width_pixels: Optional[int] = None
-    height_pixels: Optional[int] = None
+    display_mode: str | None = None
+    width_pixels: int | None = None
+    height_pixels: int | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -202,5 +199,5 @@ class SelectionResult(BaseModel):
     """
 
     selected_count: int = Field(default=0, ge=0)
-    guids: List[str] = Field(default_factory=list)
-    message: Optional[str] = None
+    guids: list[str] = Field(default_factory=list)
+    message: str | None = None

@@ -18,8 +18,6 @@ Design notes
 """
 
 import traceback
-from typing import Any, Callable, Dict, List, Optional
-
 
 # ---------------------------------------------------------------------------
 # Error codes
@@ -181,7 +179,7 @@ def dispatch(method, params, request_id=None):
         return error_response(
             request_id,
             ErrorCode.NOT_FOUND,
-            "Method not found: {method}".format(method=method),
+            f"Method not found: {method}",
             details={"available_methods": get_registered_methods()},
         )
 
@@ -195,7 +193,7 @@ def dispatch(method, params, request_id=None):
         return error_response(
             request_id,
             ErrorCode.NOT_IMPLEMENTED,
-            str(exc) or "Method not implemented: {method}".format(method=method),
+            str(exc) or f"Method not implemented: {method}",
         )
 
     except (ValueError, TypeError, KeyError) as exc:
@@ -213,8 +211,6 @@ def dispatch(method, params, request_id=None):
         return error_response(
             request_id,
             ErrorCode.INTERNAL_ERROR,
-            "Unhandled exception in handler '{method}': {exc}".format(
-                method=method, exc=repr(exc)
-            ),
+            f"Unhandled exception in handler '{method}': {repr(exc)}",
             details={"traceback": tb},
         )

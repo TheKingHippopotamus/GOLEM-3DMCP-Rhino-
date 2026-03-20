@@ -12,10 +12,7 @@ Python >= 3.10 is assumed on the MCP server side (see pyproject.toml).
 
 from __future__ import annotations
 
-from typing import List, Optional
-
 from pydantic import BaseModel, Field
-
 
 # ---------------------------------------------------------------------------
 # Geometric primitives
@@ -28,7 +25,7 @@ class Point3D(BaseModel):
     y: float = 0.0
     z: float = 0.0
 
-    def to_list(self) -> List[float]:
+    def to_list(self) -> list[float]:
         """Return ``[x, y, z]`` for passing to RhinoCommon."""
         return [self.x, self.y, self.z]
 
@@ -40,7 +37,7 @@ class Vector3D(BaseModel):
     y: float = 0.0
     z: float = 1.0
 
-    def to_list(self) -> List[float]:
+    def to_list(self) -> list[float]:
         return [self.x, self.y, self.z]
 
 
@@ -67,7 +64,7 @@ class Color(BaseModel):
 
     def to_hex(self) -> str:
         """Return a CSS-style hex string, e.g. ``"#ff0000"``."""
-        return "#{:02x}{:02x}{:02x}".format(self.r, self.g, self.b)
+        return f"#{self.r:02x}{self.g:02x}{self.b:02x}"
 
 
 class BoundingBox(BaseModel):
@@ -77,7 +74,7 @@ class BoundingBox(BaseModel):
     max: Point3D
 
     @property
-    def diagonal(self) -> List[float]:
+    def diagonal(self) -> list[float]:
         """Vector from min to max corner."""
         return [
             self.max.x - self.min.x,
@@ -108,24 +105,24 @@ class OperationResult(BaseModel):
         Optional arbitrary payload for tool-specific extra information.
     """
 
-    guid: Optional[str] = None
-    guids: Optional[List[str]] = None
+    guid: str | None = None
+    guids: list[str] | None = None
     success: bool = True
-    message: Optional[str] = None
-    data: Optional[dict] = None
+    message: str | None = None
+    data: dict | None = None
 
     @classmethod
     def ok(
         cls,
-        guid: Optional[str] = None,
-        guids: Optional[List[str]] = None,
-        message: Optional[str] = None,
-        data: Optional[dict] = None,
-    ) -> "OperationResult":
+        guid: str | None = None,
+        guids: list[str] | None = None,
+        message: str | None = None,
+        data: dict | None = None,
+    ) -> OperationResult:
         """Convenience constructor for successful results."""
         return cls(guid=guid, guids=guids, success=True, message=message, data=data)
 
     @classmethod
-    def fail(cls, message: str, data: Optional[dict] = None) -> "OperationResult":
+    def fail(cls, message: str, data: dict | None = None) -> OperationResult:
         """Convenience constructor for failed results."""
         return cls(success=False, message=message, data=data)

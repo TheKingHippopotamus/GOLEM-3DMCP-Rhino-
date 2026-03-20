@@ -48,10 +48,9 @@ Usage (from startup / server code)::
 """
 
 import math
-from typing import Any, Dict, List, Optional
 
 from rhino_plugin.dispatcher import handler
-from rhino_plugin.utils.error_handler import wrap_handler, GolemError, ErrorCode
+from rhino_plugin.utils.error_handler import ErrorCode, GolemError, wrap_handler
 
 # ---------------------------------------------------------------------------
 # Rhino-environment imports
@@ -61,10 +60,10 @@ from rhino_plugin.utils.error_handler import wrap_handler, GolemError, ErrorCode
 # without crashing; at runtime inside Rhino they always succeed.
 
 try:
-    import Rhino                           # noqa: F401
+    import Rhino  # noqa: F401
     import Rhino.Geometry as RG
-    import scriptcontext as sc
     import rhinoscriptsyntax as rs
+    import scriptcontext as sc
     import System
     _RHINO_AVAILABLE = True
 except ImportError:
@@ -101,20 +100,18 @@ def _parse_point(raw, field_name="point"):
             return [float(raw["x"]), float(raw["y"]), float(raw["z"])]
         except (KeyError, TypeError, ValueError):
             raise ValueError(
-                "'{field}' dict must contain numeric 'x', 'y', 'z' keys".format(
-                    field=field_name
-                )
+                f"'{field_name}' dict must contain numeric 'x', 'y', 'z' keys"
             )
     if isinstance(raw, (list, tuple)) and len(raw) == 3:
         try:
             return [float(raw[0]), float(raw[1]), float(raw[2])]
         except (TypeError, ValueError):
             raise ValueError(
-                "'{field}' list must contain 3 numbers".format(field=field_name)
+                f"'{field_name}' list must contain 3 numbers"
             )
     raise ValueError(
-        "'{field}' must be a list [x, y, z] or dict with 'x','y','z' keys, "
-        "got: {t}".format(field=field_name, t=type(raw).__name__)
+        f"'{field_name}' must be a list [x, y, z] or dict with 'x','y','z' keys, "
+        f"got: {type(raw).__name__}"
     )
 
 
@@ -143,17 +140,13 @@ def _require_list_of_strings(value, field_name="ids"):
     """Validate that *value* is a non-empty list of strings."""
     if not isinstance(value, (list, tuple)) or len(value) == 0:
         raise ValueError(
-            "'{field}' must be a non-empty list of GUID strings".format(
-                field=field_name
-            )
+            f"'{field_name}' must be a non-empty list of GUID strings"
         )
     result = []
     for item in value:
         if not isinstance(item, str):
             raise ValueError(
-                "Each item in '{field}' must be a string GUID, got: {t}".format(
-                    field=field_name, t=type(item).__name__
-                )
+                f"Each item in '{field_name}' must be a string GUID, got: {type(item).__name__}"
             )
         result.append(item)
     return result
@@ -170,10 +163,10 @@ def _find_object(guid):
     try:
         sys_guid = System.Guid(guid)
     except Exception:
-        raise ValueError("Invalid GUID format: '{guid}'".format(guid=guid))
+        raise ValueError(f"Invalid GUID format: '{guid}'")
     obj = sc.doc.Objects.FindId(sys_guid)
     if obj is None:
-        raise KeyError("Object not found in Rhino document: '{guid}'".format(guid=guid))
+        raise KeyError(f"Object not found in Rhino document: '{guid}'")
     return obj
 
 
@@ -331,7 +324,7 @@ def rotate(params):
     try:
         angle_deg = float(angle_deg)
     except (TypeError, ValueError):
-        raise ValueError("'angle' must be a number, got: {v}".format(v=angle_deg))
+        raise ValueError(f"'angle' must be a number, got: {angle_deg}")
 
     axis = _parse_point_or_default(params.get("axis"), [0.0, 0.0, 1.0], "axis")
     copy_flag = bool(params.get("copy", False))
@@ -402,7 +395,7 @@ def scale(params):
     else:
         raise ValueError(
             "'scale_factor' must be a float (uniform) or list [sx, sy, sz] "
-            "(non-uniform), got: {t}".format(t=type(scale_raw).__name__)
+            f"(non-uniform), got: {type(scale_raw).__name__}"
         )
 
     scale_pt = RG.Point3d(sx, sy, sz)
@@ -506,9 +499,9 @@ def orient(params):
     if len(ref_raw) < 2:
         raise ValueError("At least 2 reference/target point pairs are required")
 
-    ref_pts = [_to_rhino_point(_parse_point(p, "reference_points[{i}]".format(i=i)))
+    ref_pts = [_to_rhino_point(_parse_point(p, f"reference_points[{i}]"))
                for i, p in enumerate(ref_raw)]
-    tgt_pts = [_to_rhino_point(_parse_point(p, "target_points[{i}]".format(i=i)))
+    tgt_pts = [_to_rhino_point(_parse_point(p, f"target_points[{i}]"))
                for i, p in enumerate(tgt_raw)]
     copy_flag = bool(params.get("copy", False))
 
@@ -612,7 +605,7 @@ def shear(params):
         try:
             sys_guid = System.Guid(obj_id)
         except Exception:
-            raise ValueError("Invalid GUID format: '{g}'".format(g=obj_id))
+            raise ValueError(f"Invalid GUID format: '{obj_id}'")
 
         if copy_flag:
             new_guid = sc.doc.Objects.Transform(sys_guid, xform, False)
@@ -800,7 +793,7 @@ def array_along_curve(params):
     curve_geom = crv_obj.Geometry
     if not isinstance(curve_geom, RG.Curve):
         raise ValueError(
-            "'curve_id' does not refer to a curve object: '{g}'".format(g=curve_id)
+            f"'curve_id' does not refer to a curve object: '{curve_id}'"
         )
 
     # Divide the curve into count segments -> (count+1) points but we want
@@ -904,7 +897,7 @@ def apply_transform(params):
     for row_idx, row in enumerate(matrix_raw):
         if not isinstance(row, (list, tuple)) or len(row) != 4:
             raise ValueError(
-                "'matrix' row {r} must have exactly 4 elements".format(r=row_idx)
+                f"'matrix' row {row_idx} must have exactly 4 elements"
             )
 
     copy_flag = bool(params.get("copy", False))
@@ -917,7 +910,7 @@ def apply_transform(params):
                 xform[r, c] = float(matrix_raw[r][c])
             except (TypeError, ValueError):
                 raise ValueError(
-                    "'matrix[{r}][{c}]' must be a number".format(r=r, c=c)
+                    f"'matrix[{r}][{c}]' must be a number"
                 )
 
     if not xform.IsValid:
@@ -932,7 +925,7 @@ def apply_transform(params):
         try:
             sys_guid = System.Guid(obj_id)
         except Exception:
-            raise ValueError("Invalid GUID format: '{g}'".format(g=obj_id))
+            raise ValueError(f"Invalid GUID format: '{obj_id}'")
 
         new_guid = sc.doc.Objects.Transform(sys_guid, xform, not copy_flag)
         if new_guid != System.Guid.Empty:
@@ -1021,9 +1014,7 @@ def group(params):
             pass
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.AddObjectsToGroup could not add objects to group '{g}'".format(
-                g=group_name
-            ),
+            f"rs.AddObjectsToGroup could not add objects to group '{group_name}'",
             details={"ids": ids, "group_name": group_name},
         )
 
@@ -1064,7 +1055,7 @@ def ungroup(params):
     if not success:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.DeleteGroup failed for group '{g}'".format(g=group_name),
+            f"rs.DeleteGroup failed for group '{group_name}'",
             details={"group_name": group_name},
         )
 
@@ -1220,7 +1211,7 @@ def set_properties(params):
             raise ValueError("'layer' must be a string")
         if rs.IsLayer(layer) is False:
             raise ValueError(
-                "Layer '{l}' does not exist in the document".format(l=layer)
+                f"Layer '{layer}' does not exist in the document"
             )
 
     # Validate colour.
@@ -1244,11 +1235,11 @@ def set_properties(params):
         try:
             sys_guid = System.Guid(obj_id)
         except Exception:
-            raise ValueError("Invalid GUID format: '{g}'".format(g=obj_id))
+            raise ValueError(f"Invalid GUID format: '{obj_id}'")
 
         rh_obj = sc.doc.Objects.FindId(sys_guid)
         if rh_obj is None:
-            raise KeyError("Object not found in Rhino document: '{g}'".format(g=obj_id))
+            raise KeyError(f"Object not found in Rhino document: '{obj_id}'")
 
         attrs = rh_obj.Attributes.Duplicate()
 

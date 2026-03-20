@@ -19,7 +19,6 @@ Display mode names accepted (case-insensitive) examples:
 """
 
 import base64
-from typing import Dict, Optional
 
 try:
     import Rhino
@@ -105,7 +104,7 @@ def capture_viewport_to_base64(
 
         if view is None:
             return {
-                "error": "View not found: '{name}'".format(name=view_name),
+                "error": f"View not found: '{view_name}'",
                 "code": "OBJECT_NOT_FOUND",
             }
     else:
@@ -167,7 +166,7 @@ def capture_viewport_to_base64(
             except Exception:
                 pass
         return {
-            "error": "CaptureToBitmap failed: {exc}".format(exc=repr(exc)),
+            "error": f"CaptureToBitmap failed: {repr(exc)}",
             "code": "OPERATION_FAILED",
         }
 
@@ -208,7 +207,7 @@ def capture_viewport_to_base64(
             except Exception:
                 pass
         return {
-            "error": "Failed to encode bitmap as PNG: {exc}".format(exc=repr(exc)),
+            "error": f"Failed to encode bitmap as PNG: {repr(exc)}",
             "code": "INTERNAL_ERROR",
         }
     finally:

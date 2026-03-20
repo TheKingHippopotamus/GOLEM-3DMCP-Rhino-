@@ -14,10 +14,10 @@ Registered tools:
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
-from golem_3dmcp.server import mcp
 from golem_3dmcp.connection import get_connection
+from golem_3dmcp.server import mcp
 
 
 def _send(method: str, params: dict) -> dict:
@@ -62,7 +62,7 @@ def create_layer(
     color_b: int = 0,
     visible: bool = True,
     locked: bool = False,
-    parent: Optional[str] = None,
+    parent: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a new layer in the Rhino document.
@@ -109,9 +109,9 @@ def delete_layer(name: str, delete_objects: bool = False) -> dict[str, Any]:
 
 @mcp.tool()
 def list_objects(
-    layer: Optional[str] = None,
-    object_type: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    object_type: str | None = None,
+    name: str | None = None,
     visible_only: bool = False,
     unlocked_only: bool = False,
 ) -> dict[str, Any]:

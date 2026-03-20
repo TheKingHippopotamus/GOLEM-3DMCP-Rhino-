@@ -32,21 +32,19 @@ Wire method names (must match ``mcp_server/tools/scene.py`` exactly):
 """
 
 import fnmatch
-from typing import Any, Dict, List, Optional
 
 try:
-    import Rhino                                   # noqa: F401
-    import Rhino.Geometry as RG                    # noqa: F401
-    import scriptcontext as sc                     # noqa: F401
-    import rhinoscriptsyntax as rs                 # noqa: F401
-    import System                                  # noqa: F401
+    import Rhino  # noqa: F401
+    import Rhino.Geometry as RG  # noqa: F401
+    import rhinoscriptsyntax as rs  # noqa: F401
+    import scriptcontext as sc  # noqa: F401
+    import System  # noqa: F401
     _RHINO_AVAILABLE = True
 except ImportError:
     _RHINO_AVAILABLE = False
 
 from rhino_plugin.dispatcher import handler
-from rhino_plugin.utils.geometry_serializer import serialize_object, serialize_any
-
+from rhino_plugin.utils.geometry_serializer import serialize_any, serialize_object
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -479,13 +477,13 @@ def get_object_info(params):
         sys_guid = System.Guid(normalised)
     except Exception:
         raise ValueError(
-            "Invalid GUID format: '{guid}'".format(guid=guid_str)
+            f"Invalid GUID format: '{guid_str}'"
         )
 
     obj = sc.doc.Objects.FindId(sys_guid)
     if obj is None:
         raise KeyError(
-            "Object not found in Rhino document: '{guid}'".format(guid=guid_str)
+            f"Object not found in Rhino document: '{guid_str}'"
         )
 
     result = serialize_object(obj)  # type: Dict[str, Any]
@@ -532,7 +530,6 @@ def get_object_info(params):
             except Exception:
                 pass
             try:
-                from Rhino.DocObjects import ObjectColorSource
                 attrs_dict["color_source"] = str(attrs.ColorSource)
             except Exception:
                 pass
@@ -541,7 +538,6 @@ def get_object_info(params):
             except Exception:
                 pass
             try:
-                from Rhino.DocObjects import ObjectMode
                 attrs_dict["mode"] = str(attrs.Mode)
             except Exception:
                 pass
@@ -803,7 +799,7 @@ def create_layer(params):
 
     if layer_index < 0:
         raise RuntimeError(
-            "Rhino failed to create layer '{name}'.".format(name=name)
+            f"Rhino failed to create layer '{name}'."
         )
 
     full_path = ""
@@ -862,13 +858,13 @@ def delete_layer(params):
     layer_index = sc.doc.Layers.FindByFullPath(str(name), -1)
     if layer_index < 0:
         raise ValueError(
-            "Layer not found: '{name}'".format(name=name)
+            f"Layer not found: '{name}'"
         )
 
     # Guard: cannot delete the current layer.
     if layer_index == sc.doc.Layers.CurrentLayerIndex:
         raise RuntimeError(
-            "Cannot delete the current active layer: '{name}'.".format(name=name)
+            f"Cannot delete the current active layer: '{name}'."
         )
 
     # Count objects on this layer.
@@ -878,10 +874,8 @@ def delete_layer(params):
     if object_count > 0:
         if not delete_objects:
             raise RuntimeError(
-                "Layer '{name}' has {count} object(s). "
-                "Set delete_objects=True to remove them along with the layer.".format(
-                    name=name, count=object_count
-                )
+                f"Layer '{name}' has {object_count} object(s). "
+                "Set delete_objects=True to remove them along with the layer."
             )
         # Delete objects on the layer first.
         try:
@@ -902,8 +896,8 @@ def delete_layer(params):
     success = sc.doc.Layers.Delete(layer_index, True)
     if not success:
         raise RuntimeError(
-            "Rhino refused to delete layer '{name}'. "
-            "It may have sub-layers; delete those first.".format(name=name)
+            f"Rhino refused to delete layer '{name}'. "
+            "It may have sub-layers; delete those first."
         )
 
     sc.doc.Views.Redraw()
@@ -911,7 +905,7 @@ def delete_layer(params):
     return {
         "success": True,
         "deleted_objects": deleted_objects,
-        "message": "Layer '{name}' deleted.".format(name=name),
+        "message": f"Layer '{name}' deleted.",
     }
 
 
@@ -951,7 +945,7 @@ def set_current_layer(params):
     layer_index = sc.doc.Layers.FindByFullPath(str(name), -1)
     if layer_index < 0:
         raise ValueError(
-            "Layer not found: '{name}'".format(name=name)
+            f"Layer not found: '{name}'"
         )
 
     # Rhino requires the target layer to be visible and unlocked.
@@ -960,7 +954,7 @@ def set_current_layer(params):
     try:
         if not layer.IsVisible:
             raise RuntimeError(
-                "Cannot set a hidden layer as current: '{name}'.".format(name=name)
+                f"Cannot set a hidden layer as current: '{name}'."
             )
     except RuntimeError:
         raise
@@ -970,7 +964,7 @@ def set_current_layer(params):
     try:
         if layer.IsLocked:
             raise RuntimeError(
-                "Cannot set a locked layer as current: '{name}'.".format(name=name)
+                f"Cannot set a locked layer as current: '{name}'."
             )
     except RuntimeError:
         raise

@@ -23,15 +23,14 @@ rhino_connection
 from __future__ import annotations
 
 import json
-import struct
 import socket
+import struct
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
 from golem_3dmcp.connection import RhinoConnection, RhinoConnectionError
-
 
 # ---------------------------------------------------------------------------
 # Helpers

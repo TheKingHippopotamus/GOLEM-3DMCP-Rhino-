@@ -5,7 +5,7 @@ GOLEM-3DMCP — The most powerful MCP server for Rhinoceros 3D.
 """
 
 try:
-    from importlib.metadata import version, PackageNotFoundError
+    from importlib.metadata import PackageNotFoundError, version
     try:
         __version__ = version("golem-3dmcp")
     except PackageNotFoundError:

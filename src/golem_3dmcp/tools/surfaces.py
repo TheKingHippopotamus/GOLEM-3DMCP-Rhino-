@@ -20,10 +20,10 @@ Registered tools:
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
-from golem_3dmcp.server import mcp
 from golem_3dmcp.connection import get_connection
+from golem_3dmcp.server import mcp
 
 
 def _send(method: str, params: dict) -> dict:
@@ -42,8 +42,8 @@ def extrude_curve(
     direction_z: float = 1.0,
     distance: float = 1.0,
     cap: bool = True,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Extrude a curve profile along a direction vector to create a surface or solid.
@@ -71,8 +71,8 @@ def loft_curves(
     curve_guids: list[str],
     closed: bool = False,
     loft_type: str = "Normal",
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Loft a surface through an ordered list of cross-section curves.
@@ -105,8 +105,8 @@ def revolve_curve(
     axis_end_z: float = 1.0,
     start_angle: float = 0.0,
     end_angle: float = 360.0,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Revolve a profile curve around an axis to create a surface of revolution.
@@ -136,8 +136,8 @@ def sweep_1_rail(
     rail_guid: str,
     cross_section_guids: list[str],
     closed: bool = False,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a surface by sweeping cross-section curves along a single rail curve.
@@ -164,8 +164,8 @@ def sweep_2_rails(
     rail2_guid: str,
     cross_section_guids: list[str],
     closed: bool = False,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a surface by sweeping cross-sections along two rail curves.
@@ -194,8 +194,8 @@ def patch_surface(
     u_spans: int = 10,
     v_spans: int = 10,
     trim: bool = True,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Fit a patch surface to boundary curves and/or point objects.
@@ -221,8 +221,8 @@ def patch_surface(
 @mcp.tool()
 def planar_surface(
     boundary_guid: str,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a planar surface from a closed planar curve boundary.
@@ -284,11 +284,11 @@ def offset_surface(
 @mcp.tool()
 def mesh_from_surface(
     source_guid: str,
-    max_edge_length: Optional[float] = None,
+    max_edge_length: float | None = None,
     refine_mesh: bool = True,
     simple_planes: bool = False,
-    layer: Optional[str] = None,
-    name: Optional[str] = None,
+    layer: str | None = None,
+    name: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a mesh approximation of a brep or surface.

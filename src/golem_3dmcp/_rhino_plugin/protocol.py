@@ -17,9 +17,7 @@ Author: GOLEM-3DMCP
 """
 
 import json
-import socket
 import struct
-from typing import Dict, Any, Optional
 
 # Header is a single big-endian unsigned 32-bit integer (4 bytes).
 _HEADER_FORMAT = "!I"
@@ -54,10 +52,7 @@ def _recv_exactly(sock, num_bytes):
             # recv() returning b"" means the peer closed the connection.
             raise ConnectionError(
                 "Connection closed by remote peer after receiving "
-                "{received}/{expected} bytes".format(
-                    received=num_bytes - remaining,
-                    expected=num_bytes,
-                )
+                f"{num_bytes - remaining}/{num_bytes} bytes"
             )
         buf += chunk
         remaining -= len(chunk)
@@ -92,9 +87,7 @@ def send_message(sock, data):
     payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
     if len(payload) > 0xFFFFFFFF:
         raise ValueError(
-            "Message payload too large: {size} bytes (max 4294967295)".format(
-                size=len(payload)
-            )
+            f"Message payload too large: {len(payload)} bytes (max 4294967295)"
         )
     header = struct.pack(_HEADER_FORMAT, len(payload))
     # sendall() keeps sending until every byte is transmitted, handling
@@ -130,10 +123,7 @@ def recv_message(sock):
     _MAX_PAYLOAD = 64 * 1024 * 1024  # 64 MB
     if payload_length > _MAX_PAYLOAD:
         raise ValueError(
-            "Incoming message too large: {size} bytes (max {limit})".format(
-                size=payload_length,
-                limit=_MAX_PAYLOAD,
-            )
+            f"Incoming message too large: {payload_length} bytes (max {_MAX_PAYLOAD})"
         )
 
     # Step 2: Read exactly payload_length bytes for the JSON body.

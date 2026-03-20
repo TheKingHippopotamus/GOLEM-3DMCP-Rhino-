@@ -12,10 +12,10 @@ Registered tools:
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
-from golem_3dmcp.server import mcp
 from golem_3dmcp.connection import get_connection
+from golem_3dmcp.server import mcp
 
 
 def _send(method: str, params: dict) -> dict:
@@ -29,7 +29,7 @@ def _send(method: str, params: dict) -> dict:
 @mcp.tool()
 def execute_python(
     code: str,
-    context: Optional[dict[str, Any]] = None,
+    context: dict[str, Any] | None = None,
     timeout_seconds: int = 30,
     capture_output: bool = True,
 ) -> dict[str, Any]:
@@ -119,7 +119,7 @@ def execute_rhinoscript(
 @mcp.tool()
 def evaluate_expression(
     expression: str,
-    variables: Optional[dict[str, Any]] = None,
+    variables: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """
     Evaluate a single Python expression and return its value.

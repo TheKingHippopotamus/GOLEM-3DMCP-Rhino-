@@ -27,18 +27,17 @@ Design notes
   the Rhino command history window instead.
 """
 
-import io
 import contextlib
-from typing import Any, Optional
+import io
 
 # These imports are only available inside the Rhino Python environment.
 # The try/except lets linters and unit-test runners import the module without
 # exploding; at runtime inside Rhino they will always succeed.
 try:
-    import Rhino                              # type: ignore
-    import scriptcontext as sc                # type: ignore
-    import rhinoscriptsyntax as rs            # type: ignore
-    import System                             # type: ignore
+    import Rhino  # type: ignore
+    import rhinoscriptsyntax as rs  # type: ignore
+    import scriptcontext as sc  # type: ignore
+    import System  # type: ignore
     _RHINO_AVAILABLE = True
 except ImportError:
     _RHINO_AVAILABLE = False
@@ -50,7 +49,6 @@ except ImportError:
 
 from rhino_plugin.dispatcher import handler  # noqa: E402
 from rhino_plugin.utils.geometry_serializer import serialize_any  # noqa: E402
-
 
 # ---------------------------------------------------------------------------
 # Serialisation helper
@@ -370,22 +368,20 @@ def handle_run_rhino_script(params):
 
     if not os.path.isfile(file_path):
         raise ValueError(
-            "Script file not found: {path}".format(path=file_path)
+            f"Script file not found: {file_path}"
         )
 
     try:
-        with open(file_path, "r", encoding="utf-8") as fh:
+        with open(file_path, encoding="utf-8") as fh:
             code = fh.read()
     except Exception as exc:
         raise ValueError(
-            "Could not read script file {path}: {exc}".format(
-                path=file_path, exc=exc
-            )
+            f"Could not read script file {file_path}: {exc}"
         )
 
     if not code.strip():
         raise ValueError(
-            "Script file is empty: {path}".format(path=file_path)
+            f"Script file is empty: {file_path}"
         )
 
     namespace = _build_namespace()

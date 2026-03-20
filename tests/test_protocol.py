@@ -11,14 +11,13 @@ made.
 from __future__ import annotations
 
 import json
-import struct
 import socket
-from unittest.mock import MagicMock, call, patch
+import struct
+from unittest.mock import MagicMock
 
 import pytest
 
-from golem_3dmcp.protocol import send_message, recv_message
-
+from golem_3dmcp.protocol import recv_message, send_message
 
 # ---------------------------------------------------------------------------
 # Helpers

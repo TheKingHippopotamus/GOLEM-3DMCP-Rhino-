@@ -33,15 +33,14 @@ Design notes
   and return an OPERATION_FAILED result dict (never raise).
 """
 
-import Rhino                                          # noqa: F401 (Rhino host)
-import scriptcontext as sc
+import Rhino  # noqa: F401 (Rhino host)
 import rhinoscriptsyntax as rs
+import scriptcontext as sc
 import System
 import System.Drawing
 
 from rhino_plugin.dispatcher import handler
 from rhino_plugin.utils.screenshot import capture_viewport_to_base64
-
 
 # ---------------------------------------------------------------------------
 # Standard view name constants and helpers
@@ -81,7 +80,7 @@ def _resolve_view(view_name):
         if v.ActiveViewport.Name.lower() == name_lower:
             return v
 
-    raise ValueError("View not found: '{name}'".format(name=view_name))
+    raise ValueError(f"View not found: '{view_name}'")
 
 
 def _point3d(x, y, z):
@@ -127,9 +126,9 @@ def capture_viewport(params):
     view_name = params.get("view_name", None)
 
     if width < 1 or width > 16384:
-        raise ValueError("width must be between 1 and 16384, got {w}".format(w=width))
+        raise ValueError(f"width must be between 1 and 16384, got {width}")
     if height < 1 or height > 16384:
-        raise ValueError("height must be between 1 and 16384, got {h}".format(h=height))
+        raise ValueError(f"height must be between 1 and 16384, got {height}")
 
     result = capture_viewport_to_base64(
         view_name=view_name,
@@ -184,7 +183,7 @@ def set_view(params):
         if not result:
             return {
                 "success": False,
-                "error": "RestoreNamedView failed for '{name}'.".format(name=named_view),
+                "error": f"RestoreNamedView failed for '{named_view}'.",
                 "code": "OPERATION_FAILED",
             }
         sc.doc.Views.Redraw()
@@ -199,9 +198,9 @@ def set_view(params):
     key = str(view_name).lower()
     if key not in _STANDARD_VIEWS:
         raise ValueError(
-            "view_name '{v}' is not a recognised standard view. "
+            f"view_name '{view_name}' is not a recognised standard view. "
             "Choose from: Top, Bottom, Left, Right, Front, Back, "
-            "Perspective, TwoPointPerspective.".format(v=view_name)
+            "Perspective, TwoPointPerspective."
         )
 
     # rhinoscriptsyntax uses the view's ActiveViewport.Name as the first arg.
@@ -398,10 +397,8 @@ def set_display_mode(params):
     mode_str = str(mode)
     if mode_str.lower() not in _VALID_DISPLAY_MODES:
         raise ValueError(
-            "Unrecognised display mode '{m}'. Valid modes: "
-            "Wireframe, Shaded, Rendered, Ghosted, XRay, Technical, Artistic, Pen.".format(
-                m=mode_str
-            )
+            f"Unrecognised display mode '{mode_str}'. Valid modes: "
+            "Wireframe, Shaded, Rendered, Ghosted, XRay, Technical, Artistic, Pen."
         )
 
     # Resolve the target view name string for rhinoscriptsyntax.
@@ -418,7 +415,7 @@ def set_display_mode(params):
     if result is None:
         return {
             "success": False,
-            "error": "ViewDisplayMode returned None for mode '{m}'.".format(m=mode_str),
+            "error": f"ViewDisplayMode returned None for mode '{mode_str}'.",
             "code": "OPERATION_FAILED",
         }
 
@@ -463,7 +460,7 @@ def set_camera(params):
         if isinstance(value, (list, tuple)):
             if len(value) != 3:
                 raise ValueError(
-                    "'{n}' must have exactly 3 elements [x, y, z].".format(n=name)
+                    f"'{name}' must have exactly 3 elements [x, y, z]."
                 )
             return (float(value[0]), float(value[1]), float(value[2]))
         if isinstance(value, dict):
@@ -471,12 +468,10 @@ def set_camera(params):
                 return (float(value["x"]), float(value["y"]), float(value["z"]))
             except KeyError as exc:
                 raise ValueError(
-                    "'{n}' dict is missing key: {k}".format(n=name, k=exc)
+                    f"'{name}' dict is missing key: {exc}"
                 )
         raise TypeError(
-            "'{n}' must be a list [x,y,z] or dict {{x,y,z}}, got {t}.".format(
-                n=name, t=type(value).__name__
-            )
+            f"'{name}' must be a list [x,y,z] or dict {{x,y,z}}, got {type(value).__name__}."
         )
 
     cam_x, cam_y, cam_z = _parse_point(camera_location, "camera_location")
@@ -485,7 +480,7 @@ def set_camera(params):
     if lens_length is not None:
         lens_length = float(lens_length)
         if lens_length <= 0:
-            raise ValueError("lens_length must be positive, got {l}".format(l=lens_length))
+            raise ValueError(f"lens_length must be positive, got {lens_length}")
 
     # Resolve view name string for rhinoscriptsyntax.
     if view_name is not None:
@@ -553,7 +548,7 @@ def _create_named_view_impl(params):
     if result is None:
         return {
             "success": False,
-            "error": "AddNamedView failed for '{name}'.".format(name=name),
+            "error": f"AddNamedView failed for '{name}'.",
             "code": "OPERATION_FAILED",
         }
 
@@ -622,8 +617,8 @@ def restore_named_view(params):
     if not result:
         return {
             "success": False,
-            "error": "RestoreNamedView failed for '{name}'. "
-                     "Check that the named view exists.".format(name=name),
+            "error": f"RestoreNamedView failed for '{name}'. "
+                     "Check that the named view exists.",
             "code": "OPERATION_FAILED",
         }
 
@@ -767,19 +762,17 @@ def set_background_color(params):
         try:
             r, g, b = int(color["r"]), int(color["g"]), int(color["b"])
         except KeyError as exc:
-            raise ValueError("'color' dict is missing key: {k}".format(k=exc))
+            raise ValueError(f"'color' dict is missing key: {exc}")
     else:
         raise TypeError(
-            "'color' must be a list [r,g,b] or dict {{r,g,b}}, "
-            "got {t}.".format(t=type(color).__name__)
+            "'color' must be a list [r,g,b] or dict {r,g,b}, "
+            f"got {type(color).__name__}."
         )
 
     for channel, val in (("r", r), ("g", g), ("b", b)):
         if not 0 <= val <= 255:
             raise ValueError(
-                "Color channel '{c}' must be between 0 and 255, got {v}.".format(
-                    c=channel, v=val
-                )
+                f"Color channel '{channel}' must be between 0 and 255, got {val}."
             )
 
     new_color = System.Drawing.Color.FromArgb(r, g, b)

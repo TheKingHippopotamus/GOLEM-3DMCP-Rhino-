@@ -25,10 +25,10 @@ Imports that only resolve inside Rhino:
 # The try/except lets linters and unit-test runners import the module without
 # exploding; at runtime inside Rhino they will always succeed.
 try:
-    import Rhino                          # noqa: F401
+    import Rhino  # noqa: F401
     import Rhino.Geometry as RG
+    import rhinoscriptsyntax as rs  # noqa: F401
     import scriptcontext as sc
-    import rhinoscriptsyntax as rs        # noqa: F401
     import System
     _RHINO_AVAILABLE = True
 except ImportError:

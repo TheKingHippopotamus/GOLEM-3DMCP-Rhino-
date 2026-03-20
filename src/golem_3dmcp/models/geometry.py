@@ -17,12 +17,9 @@ Design notes
 
 from __future__ import annotations
 
-from typing import List, Optional
-
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from .common import Color, Plane, Point3D, Vector3D
-
 
 # ---------------------------------------------------------------------------
 # Shared mixin for common object attributes
@@ -36,15 +33,15 @@ class ObjectAttributes(BaseModel):
     the layer, name, and colour of the created object in a single call.
     """
 
-    layer: Optional[str] = Field(
+    layer: str | None = Field(
         default=None,
         description="Full layer path, e.g. 'Walls' or 'Site::Landscaping'.",
     )
-    name: Optional[str] = Field(
+    name: str | None = Field(
         default=None,
         description="Object name / label.",
     )
-    color: Optional[Color] = Field(
+    color: Color | None = Field(
         default=None,
         description="Object colour override.  Defaults to the layer colour if omitted.",
     )
@@ -149,7 +146,7 @@ class CurveParams(ObjectAttributes):
     Parameters for creating a NURBS curve through or near a set of points.
     """
 
-    points: List[Point3D] = Field(
+    points: list[Point3D] = Field(
         min_length=2,
         description="Ordered list of control or through-points.",
     )
@@ -159,11 +156,11 @@ class CurveParams(ObjectAttributes):
         le=11,
         description="Polynomial degree of the NURBS curve.",
     )
-    weights: Optional[List[float]] = Field(
+    weights: list[float] | None = Field(
         default=None,
         description="Per-point weights (same length as ``points``).  Uniform weights if omitted.",
     )
-    knots: Optional[List[float]] = Field(
+    knots: list[float] | None = Field(
         default=None,
         description="Full knot vector.  Auto-generated if omitted.",
     )
@@ -177,7 +174,7 @@ class CurveParams(ObjectAttributes):
 class PolylineParams(ObjectAttributes):
     """Parameters for creating a polyline through an ordered point list."""
 
-    points: List[Point3D] = Field(min_length=2)
+    points: list[Point3D] = Field(min_length=2)
     closed: bool = Field(
         default=False,
         description="If ``True`` the last point is connected back to the first.",
@@ -204,7 +201,7 @@ class ArcParams(ObjectAttributes):
         default=180.0,
         description="End angle in degrees.",
     )
-    plane: Optional[Plane] = Field(
+    plane: Plane | None = Field(
         default=None,
         description="Construction plane for the arc.  Defaults to world XY.",
     )
@@ -215,7 +212,7 @@ class CircleParams(ObjectAttributes):
 
     center: Point3D = Field(default_factory=Point3D)
     radius: float = Field(default=1.0, gt=0)
-    plane: Optional[Plane] = Field(
+    plane: Plane | None = Field(
         default=None,
         description="Construction plane.  Defaults to world XY.",
     )
@@ -249,7 +246,7 @@ class ExtrudeParams(ObjectAttributes):
 class LoftParams(ObjectAttributes):
     """Loft a surface through an ordered list of section curves."""
 
-    curve_guids: List[str] = Field(
+    curve_guids: list[str] = Field(
         min_length=2,
         description="Ordered list of cross-section curve GUIDs.",
     )
@@ -278,7 +275,7 @@ class RevolutionParams(ObjectAttributes):
 class PatchParams(ObjectAttributes):
     """Fit a patch surface to a set of curves or points."""
 
-    input_guids: List[str] = Field(
+    input_guids: list[str] = Field(
         min_length=1,
         description="GUIDs of boundary curves, points, or a mix thereof.",
     )
@@ -295,7 +292,7 @@ class MeshFromSurfaceParams(ObjectAttributes):
     """Mesh a brep or surface with given density settings."""
 
     source_guid: str = Field(description="GUID of the brep or surface to mesh.")
-    max_edge_length: Optional[float] = Field(
+    max_edge_length: float | None = Field(
         default=None,
         gt=0,
         description="Maximum mesh edge length.  Auto-calculated if omitted.",

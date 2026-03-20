@@ -23,10 +23,10 @@ Registered tools:
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
-from golem_3dmcp.server import mcp
 from golem_3dmcp.connection import get_connection
+from golem_3dmcp.server import mcp
 
 
 def _send(method: str, params: dict) -> dict:
@@ -195,7 +195,7 @@ def array_objects_polar(
 # ---------------------------------------------------------------------------
 
 @mcp.tool()
-def group_objects(guids: list[str], group_name: Optional[str] = None) -> dict[str, Any]:
+def group_objects(guids: list[str], group_name: str | None = None) -> dict[str, Any]:
     """
     Group objects together.
 

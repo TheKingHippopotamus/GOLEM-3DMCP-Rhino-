@@ -33,13 +33,11 @@ Python 3.9 compatibility
 Author: GOLEM-3DMCP
 """
 
-import json
 import socket
 import threading
 import traceback
-from typing import Any, Optional
 
-from rhino_plugin.protocol import send_message, recv_message
+from rhino_plugin.protocol import recv_message, send_message
 
 # ---------------------------------------------------------------------------
 # Module-level state
@@ -64,7 +62,7 @@ def _log(message):
     # type: (str) -> None
     """Write to the Rhino console if available, otherwise stdout."""
     try:
-        import Rhino                         # type: ignore
+        import Rhino  # type: ignore
         try:
             Rhino.RhinoApp.WriteLine(message)
             return
@@ -90,8 +88,8 @@ def _run_on_ui_thread(func):
     ``dispatcher`` which imports ``handlers`` which might import us).
     """
     try:
-        import Rhino                         # type: ignore
-        import System                        # type: ignore
+        import Rhino  # type: ignore
+        import System  # type: ignore
         rhino_available = True
     except ImportError:
         rhino_available = False
@@ -163,7 +161,7 @@ def _dispatch_gh(method, params, request_id):
     except ImportError as exc:
         return _error_response(
             request_id, -32603,
-            "Could not import rhino_plugin.dispatcher: {err}".format(err=exc)
+            f"Could not import rhino_plugin.dispatcher: {exc}"
         )
 
     try:
@@ -176,7 +174,7 @@ def _dispatch_gh(method, params, request_id):
         tb = traceback.format_exc()
         return _error_response(
             request_id, -32603,
-            "Unhandled error dispatching '{m}': {err}".format(m=method, err=exc)
+            f"Unhandled error dispatching '{method}': {exc}"
         )
 
     # Normalise the jsonrpc envelope -> wire envelope.
@@ -201,7 +199,7 @@ def _handle_gh_client(conn, addr):
 
     Uses the same length-prefixed JSON framing as the main server.
     """
-    _log("GH server: client connected {addr}".format(addr=addr))
+    _log(f"GH server: client connected {addr}")
     conn.settimeout(None)
 
     try:
@@ -209,15 +207,13 @@ def _handle_gh_client(conn, addr):
             try:
                 request = recv_message(conn)
             except ConnectionError:
-                _log("GH server: client {addr} disconnected.".format(addr=addr))
+                _log(f"GH server: client {addr} disconnected.")
                 break
             except OSError as exc:
-                _log("GH server: socket error reading from {addr}: {exc}".format(
-                    addr=addr, exc=exc))
+                _log(f"GH server: socket error reading from {addr}: {exc}")
                 break
             except Exception as exc:
-                _log("GH server: unexpected read error from {addr}: {exc}".format(
-                    addr=addr, exc=exc))
+                _log(f"GH server: unexpected read error from {addr}: {exc}")
                 break
 
             request_id = request.get("id", None)
@@ -243,14 +239,13 @@ def _handle_gh_client(conn, addr):
                 except Exception as exc:
                     response = _error_response(
                         request_id, -32603,
-                        "Internal error: {exc}".format(exc=exc)
+                        f"Internal error: {exc}"
                     )
 
             try:
                 send_message(conn, response)
             except OSError as exc:
-                _log("GH server: socket error writing to {addr}: {exc}".format(
-                    addr=addr, exc=exc))
+                _log(f"GH server: socket error writing to {addr}: {exc}")
                 break
 
     finally:
@@ -258,7 +253,7 @@ def _handle_gh_client(conn, addr):
             conn.close()
         except OSError:
             pass
-        _log("GH server: session ended for {addr}".format(addr=addr))
+        _log(f"GH server: session ended for {addr}")
 
 
 # ---------------------------------------------------------------------------
@@ -272,7 +267,7 @@ def _accept_loop(srv):
         srv.settimeout(1.0)
         try:
             conn, addr = srv.accept()
-        except socket.timeout:
+        except TimeoutError:
             continue
         except OSError:
             break
@@ -320,8 +315,8 @@ def start_gh_server(host=GH_DEFAULT_HOST, port=GH_DEFAULT_PORT):
     with _gh_running_lock:
         if _gh_running:
             _log(
-                "GH server: already running on {h}:{p}. "
-                "Ignoring start_gh_server().".format(h=host, p=port)
+                f"GH server: already running on {host}:{port}. "
+                "Ignoring start_gh_server()."
             )
             return
 
@@ -331,8 +326,7 @@ def start_gh_server(host=GH_DEFAULT_HOST, port=GH_DEFAULT_PORT):
         try:
             srv.bind((host, port))
         except OSError as exc:
-            _log("GH server: failed to bind {h}:{p} — {exc}".format(
-                h=host, p=port, exc=exc))
+            _log(f"GH server: failed to bind {host}:{port} — {exc}")
             srv.close()
             raise
 
@@ -340,7 +334,7 @@ def start_gh_server(host=GH_DEFAULT_HOST, port=GH_DEFAULT_PORT):
         _gh_server_socket = srv
         _gh_running = True
 
-    _log("GH server: listening on {h}:{p}".format(h=host, p=port))
+    _log(f"GH server: listening on {host}:{port}")
 
     _gh_server_thread = threading.Thread(
         target=_accept_loop,

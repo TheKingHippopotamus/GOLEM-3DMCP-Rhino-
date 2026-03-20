@@ -16,10 +16,10 @@ Registered tools:
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
-from golem_3dmcp.server import mcp
 from golem_3dmcp.connection import get_connection
+from golem_3dmcp.server import mcp
 
 
 def _send(method: str, params: dict) -> dict:
@@ -73,7 +73,7 @@ def save_document_as(
 
 @mcp.tool()
 def new_document(
-    template_path: Optional[str] = None,
+    template_path: str | None = None,
     units: str = "Millimeters",
 ) -> dict[str, Any]:
     """
@@ -100,8 +100,8 @@ def new_document(
 @mcp.tool()
 def import_file(
     file_path: str,
-    layer: Optional[str] = None,
-    import_units: Optional[str] = None,
+    layer: str | None = None,
+    import_units: str | None = None,
 ) -> dict[str, Any]:
     """
     Import geometry from a file into the current Rhino document.
@@ -135,7 +135,7 @@ def import_file(
 def export_objects(
     guids: list[str],
     file_path: str,
-    file_format: Optional[str] = None,
+    file_format: str | None = None,
     overwrite: bool = False,
 ) -> dict[str, Any]:
     """
@@ -162,7 +162,7 @@ def export_objects(
 @mcp.tool()
 def export_document(
     file_path: str,
-    file_format: Optional[str] = None,
+    file_format: str | None = None,
     overwrite: bool = False,
     selected_only: bool = False,
 ) -> dict[str, Any]:

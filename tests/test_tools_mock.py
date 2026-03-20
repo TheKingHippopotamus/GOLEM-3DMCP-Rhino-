@@ -22,7 +22,10 @@ from __future__ import annotations
 from typing import Any
 from unittest.mock import patch
 
-import pytest
+import golem_3dmcp.tools.creation as _creation_mod
+import golem_3dmcp.tools.files as _files_mod
+import golem_3dmcp.tools.manipulation as _manipulation_mod
+import golem_3dmcp.tools.operations as _operations_mod
 
 # ---------------------------------------------------------------------------
 # Pre-import ALL tool modules here at collection time.
@@ -30,15 +33,9 @@ import pytest
 # patching the 'get_connection' name inside each module's namespace is the
 # correct way to intercept the call.
 # ---------------------------------------------------------------------------
-
 import golem_3dmcp.tools.scene as _scene_mod
-import golem_3dmcp.tools.creation as _creation_mod
-import golem_3dmcp.tools.operations as _operations_mod
-import golem_3dmcp.tools.manipulation as _manipulation_mod
-import golem_3dmcp.tools.viewport as _viewport_mod
-import golem_3dmcp.tools.files as _files_mod
 import golem_3dmcp.tools.scripting as _scripting_mod
-
+import golem_3dmcp.tools.viewport as _viewport_mod
 
 # ---------------------------------------------------------------------------
 # Fake connection

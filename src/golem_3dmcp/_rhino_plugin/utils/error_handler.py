@@ -23,8 +23,6 @@ Error dict schema::
 
 import functools
 import traceback
-from typing import Any, Callable, Dict, Optional
-
 
 # ---------------------------------------------------------------------------
 # Error code constants
@@ -74,7 +72,7 @@ class GolemError(Exception):
 
     def __init__(self, code, message, details=None):
         # type: (str, str, Optional[Any]) -> None
-        super(GolemError, self).__init__(message)
+        super().__init__(message)
         self.code = code
         self.message = message
         self.details = details
@@ -183,7 +181,7 @@ def wrap_handler(fn):
                 return make_error(ErrorCode.OBJECT_NOT_FOUND, msg)
             return make_error(
                 ErrorCode.INVALID_PARAMS,
-                "Missing or invalid key: {msg}".format(msg=msg),
+                f"Missing or invalid key: {msg}",
                 details={"exception_type": "KeyError"},
             )
 
@@ -203,7 +201,7 @@ def wrap_handler(fn):
             tb = traceback.format_exc()
             return make_error(
                 ErrorCode.INTERNAL_ERROR,
-                "Unhandled exception: {exc}".format(exc=repr(exc)),
+                f"Unhandled exception: {repr(exc)}",
                 details={"traceback": tb},
             )
 

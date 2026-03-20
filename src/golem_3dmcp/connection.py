@@ -20,9 +20,8 @@ Author: GOLEM-3DMCP
 import socket
 import threading
 import uuid
-from typing import Optional
 
-from golem_3dmcp.protocol import send_message, recv_message
+from golem_3dmcp.protocol import recv_message, send_message
 
 # ---------------------------------------------------------------------------
 # Custom exception hierarchy
@@ -79,7 +78,7 @@ class RhinoConnection:
     _MAX_AUTO_RECONNECT_ATTEMPTS = 3
 
     def __init__(self) -> None:
-        self._sock: Optional[socket.socket] = None
+        self._sock: socket.socket | None = None
         self._lock = threading.Lock()
         self._host: str = "127.0.0.1"
         self._port: int = 9876
@@ -134,7 +133,7 @@ class RhinoConnection:
         sock.settimeout(timeout)
         try:
             sock.connect((host, port))
-        except (OSError, socket.timeout) as exc:
+        except (TimeoutError, OSError) as exc:
             sock.close()
             raise RhinoConnectionError(
                 f"Cannot connect to Rhino plugin at {host}:{port}: {exc}"
@@ -231,7 +230,7 @@ class RhinoConnection:
             "params": params,
         }
 
-        last_exc: Optional[Exception] = None
+        last_exc: Exception | None = None
         for attempt in range(1, self._MAX_AUTO_RECONNECT_ATTEMPTS + 1):
             try:
                 return self._send_and_recv(request, timeout)
@@ -277,7 +276,7 @@ class RhinoConnection:
             try:
                 send_message(self._sock, request)
                 response = recv_message(self._sock)
-            except socket.timeout as exc:
+            except TimeoutError as exc:
                 raise RhinoTimeoutError(
                     f"Rhino did not respond to '{request['method']}' "
                     f"within {timeout}s"
@@ -316,13 +315,13 @@ class RhinoConnection:
 # Module-level singleton
 # ---------------------------------------------------------------------------
 
-_singleton: Optional[RhinoConnection] = None
+_singleton: RhinoConnection | None = None
 _singleton_lock = threading.Lock()
 
 
 def get_connection(
-    host: Optional[str] = None,
-    port: Optional[int] = None,
+    host: str | None = None,
+    port: int | None = None,
     timeout: int = 10,
 ) -> RhinoConnection:
     """

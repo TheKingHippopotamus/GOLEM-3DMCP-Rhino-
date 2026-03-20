@@ -37,16 +37,14 @@ False and every handler returns an informative error immediately.
 Author: GOLEM-3DMCP
 """
 
-import traceback
-from typing import Any, Dict, List, Optional
 
 from rhino_plugin.dispatcher import handler
 from rhino_plugin.grasshopper.gh_handlers import (
+    bake_component_output,
+    get_param_value,
     serialize_gh_component,
     serialize_gh_param,
-    get_param_value,
     set_param_value,
-    bake_component_output,
 )
 
 # ---------------------------------------------------------------------------
@@ -57,14 +55,11 @@ _GH_AVAILABLE = False
 _GH_IMPORT_ERROR = ""
 
 try:
-    import clr                                              # type: ignore
+    import clr  # type: ignore
     clr.AddReference("Grasshopper")
-    import Grasshopper                                      # type: ignore
-    from Grasshopper.Kernel import GH_Document             # type: ignore
-    from Grasshopper.Kernel.Special import GH_NumberSlider  # type: ignore
-    import rhinoscriptsyntax as rs                         # type: ignore
-    import scriptcontext as sc                             # type: ignore
-    import Rhino                                           # type: ignore
+    import Grasshopper  # type: ignore
+    import rhinoscriptsyntax as rs  # type: ignore
+    import scriptcontext as sc  # type: ignore
     _GH_AVAILABLE = True
 except Exception as _exc:
     _GH_IMPORT_ERROR = str(_exc)
@@ -103,7 +98,7 @@ def _ensure_gh_available():
         raise RuntimeError(
             "Grasshopper assemblies are not available in this environment. "
             "This handler must run inside Rhino 3D. "
-            "Import error: {err}".format(err=_GH_IMPORT_ERROR)
+            f"Import error: {_GH_IMPORT_ERROR}"
         )
 
 
@@ -120,9 +115,7 @@ def _find_component(gh_doc, nickname=None, guid=None):
         if nickname is not None and hasattr(obj, "NickName") and obj.NickName == nickname:
             return obj
     raise ValueError(
-        "Component not found in active definition: {ident}".format(
-            ident=nickname if nickname is not None else guid
-        )
+        f"Component not found in active definition: {nickname if nickname is not None else guid}"
     )
 
 
@@ -181,7 +174,7 @@ def gh_open_definition(params):
         ok = doc_io.Open(file_path)
         if not ok:
             raise RuntimeError(
-                "GH_DocumentIO.Open() returned False for path: {p}".format(p=file_path)
+                f"GH_DocumentIO.Open() returned False for path: {file_path}"
             )
         new_doc = doc_io.Document
         if new_doc is None:
@@ -191,9 +184,7 @@ def gh_open_definition(params):
         component_count = new_doc.ObjectCount
     except Exception as exc:
         raise RuntimeError(
-            "Failed to open Grasshopper definition '{p}': {err}".format(
-                p=file_path, err=exc
-            )
+            f"Failed to open Grasshopper definition '{file_path}': {exc}"
         )
 
     return {
@@ -232,7 +223,7 @@ def gh_close_definition(params):
         if canvas is not None:
             canvas.Document = None
     except Exception as exc:
-        raise RuntimeError("Failed to close Grasshopper definition: {err}".format(err=exc))
+        raise RuntimeError(f"Failed to close Grasshopper definition: {exc}")
 
     return {"status": "closed"}
 
@@ -295,7 +286,8 @@ def gh_get_param(params):
     Returns
     -------
     dict
-        For sliders:  ``{"type": "slider", "value": <float>, "min": <float>, "max": <float>, "slider_type": <str>}``
+        For sliders:  ``{"type": "slider", "value": <float>,
+        "min": <float>, "max": <float>, "slider_type": <str>}``
         For panels:   ``{"type": "panel", "value": <str>}``
         For toggles:  ``{"type": "toggle", "value": <bool>}``
         For numbers:  ``{"type": "number", "value": <float>}``
@@ -398,7 +390,7 @@ def gh_recompute(params):
         gh_doc.NewSolution(True)
         solution_state = str(gh_doc.SolutionState)
     except Exception as exc:
-        raise RuntimeError("Recompute failed: {err}".format(err=exc))
+        raise RuntimeError(f"Recompute failed: {exc}")
 
     return {"status": "ok", "solution_state": solution_state}
 
@@ -504,7 +496,7 @@ def gh_run_definition(params):
             component = _find_component(gh_doc, nickname=component_name)
             set_param_value(component, None, value)
             component.ExpireSolution(True)
-        except Exception as exc:
+        except Exception:
             # Non-fatal: log and continue so other inputs are still applied.
             pass
 
@@ -512,7 +504,7 @@ def gh_run_definition(params):
     try:
         gh_doc.NewSolution(True)
     except Exception as exc:
-        raise RuntimeError("Solution failed during run_definition: {err}".format(err=exc))
+        raise RuntimeError(f"Solution failed during run_definition: {exc}")
 
     # Collect outputs.
     outputs = {}  # type: Dict[str, Any]

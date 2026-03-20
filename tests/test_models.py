@@ -24,34 +24,34 @@ from pydantic import ValidationError
 # common.py
 # ---------------------------------------------------------------------------
 from golem_3dmcp.models.common import (
+    BoundingBox,
+    Color,
+    OperationResult,
+    Plane,
     Point3D,
     Vector3D,
-    Plane,
-    Color,
-    BoundingBox,
-    OperationResult,
 )
 
 # ---------------------------------------------------------------------------
 # geometry.py
 # ---------------------------------------------------------------------------
 from golem_3dmcp.models.geometry import (
-    ObjectAttributes,
-    BoxParams,
-    SphereParams,
-    CylinderParams,
-    ConeParams,
-    TorusParams,
-    CurveParams,
-    PolylineParams,
-    LineParams,
     ArcParams,
+    BoxParams,
     CircleParams,
+    ConeParams,
+    CurveParams,
+    CylinderParams,
     ExtrudeParams,
+    LineParams,
     LoftParams,
-    RevolutionParams,
-    PatchParams,
     MeshFromSurfaceParams,
+    ObjectAttributes,
+    PatchParams,
+    PolylineParams,
+    RevolutionParams,
+    SphereParams,
+    TorusParams,
 )
 
 # ---------------------------------------------------------------------------
@@ -59,14 +59,13 @@ from golem_3dmcp.models.geometry import (
 # ---------------------------------------------------------------------------
 from golem_3dmcp.models.scene import (
     DocumentInfo,
-    LayerInfo,
     LayerCreateParams,
-    ObjectInfo,
+    LayerInfo,
     ObjectFilter,
-    ViewInfo,
+    ObjectInfo,
     SelectionResult,
+    ViewInfo,
 )
-
 
 # ===========================================================================
 # common.py

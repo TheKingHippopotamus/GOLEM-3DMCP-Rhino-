@@ -15,10 +15,10 @@ Registered tools:
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
-from golem_3dmcp.server import mcp
 from golem_3dmcp.connection import get_connection
+from golem_3dmcp.server import mcp
 
 
 def _send(method: str, params: dict) -> dict:
@@ -48,7 +48,7 @@ def open_grasshopper_definition(file_path: str) -> dict[str, Any]:
 
 
 @mcp.tool()
-def close_grasshopper_definition(definition_id: Optional[str] = None) -> dict[str, Any]:
+def close_grasshopper_definition(definition_id: str | None = None) -> dict[str, Any]:
     """
     Close a Grasshopper definition that was previously opened.
 
@@ -65,9 +65,9 @@ def close_grasshopper_definition(definition_id: Optional[str] = None) -> dict[st
 
 @mcp.tool()
 def run_grasshopper_definition(
-    file_path: Optional[str] = None,
-    definition_id: Optional[str] = None,
-    inputs: Optional[dict[str, Any]] = None,
+    file_path: str | None = None,
+    definition_id: str | None = None,
+    inputs: dict[str, Any] | None = None,
     timeout_seconds: int = 60,
 ) -> dict[str, Any]:
     """
@@ -97,7 +97,7 @@ def run_grasshopper_definition(
 
 
 @mcp.tool()
-def get_grasshopper_outputs(definition_id: Optional[str] = None) -> dict[str, Any]:
+def get_grasshopper_outputs(definition_id: str | None = None) -> dict[str, Any]:
     """
     Read the current output values from a Grasshopper definition without
     re-running it.
@@ -119,7 +119,7 @@ def get_grasshopper_outputs(definition_id: Optional[str] = None) -> dict[str, An
 def set_grasshopper_input(
     component_name: str,
     value: Any,
-    definition_id: Optional[str] = None,
+    definition_id: str | None = None,
     run_after: bool = True,
 ) -> dict[str, Any]:
     """
@@ -150,8 +150,8 @@ def set_grasshopper_input(
 
 @mcp.tool()
 def list_grasshopper_components(
-    definition_id: Optional[str] = None,
-    component_type: Optional[str] = None,
+    definition_id: str | None = None,
+    component_type: str | None = None,
 ) -> dict[str, Any]:
     """
     List components in the Grasshopper definition.
@@ -177,9 +177,9 @@ def list_grasshopper_components(
 
 @mcp.tool()
 def bake_grasshopper_objects(
-    component_names: Optional[list[str]] = None,
-    definition_id: Optional[str] = None,
-    layer: Optional[str] = None,
+    component_names: list[str] | None = None,
+    definition_id: str | None = None,
+    layer: str | None = None,
 ) -> dict[str, Any]:
     """
     Bake (commit) Grasshopper geometry into the Rhino document as persistent

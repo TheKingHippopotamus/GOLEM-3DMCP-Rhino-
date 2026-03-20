@@ -78,6 +78,13 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
+ignore = [
+    "N814",   # CamelCase imported as constant — Rhino convention (import Rhino.Geometry as RG)
+    "N806",   # Variable in function should be lowercase — constants in function scope
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/golem_3dmcp/_rhino_plugin/**" = ["F841", "F401"]  # Plugin runs inside Rhino — some vars/imports used implicitly
 
 [tool.mypy]
 python_version = "3.10"

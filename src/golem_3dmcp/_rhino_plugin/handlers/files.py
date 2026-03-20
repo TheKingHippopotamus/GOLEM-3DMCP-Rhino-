@@ -32,15 +32,14 @@ Supported export formats (extension → Rhino recognises via plug-in):
 # The try/except lets linters and unit-test runners import the module without
 # exploding; at runtime inside Rhino they will always succeed.
 try:
-    import Rhino                              # type: ignore
-    import scriptcontext as sc                # type: ignore
-    import rhinoscriptsyntax as rs            # type: ignore
+    import Rhino  # type: ignore
+    import rhinoscriptsyntax as rs  # type: ignore
+    import scriptcontext as sc  # type: ignore
     _RHINO_AVAILABLE = True
 except ImportError:
     _RHINO_AVAILABLE = False
 
 from rhino_plugin.dispatcher import handler  # noqa: E402
-
 
 # ---------------------------------------------------------------------------
 # Supported export extensions (informational — Rhino enforces the real list)
@@ -144,7 +143,7 @@ def handle_save_document(params):
 
     if not saved:
         raise RuntimeError(
-            "Rhino WriteFile returned False for path: {path}".format(path=path)
+            f"Rhino WriteFile returned False for path: {path}"
         )
 
     return {
@@ -183,7 +182,7 @@ def handle_save_document_as(params):
 
     if not overwrite and os.path.exists(file_path):
         raise ValueError(
-            "File already exists and overwrite=False: {path}".format(path=file_path)
+            f"File already exists and overwrite=False: {file_path}"
         )
 
     options = Rhino.FileIO.FileWriteOptions()
@@ -191,7 +190,7 @@ def handle_save_document_as(params):
 
     if not saved:
         raise RuntimeError(
-            "Rhino WriteFile returned False for path: {path}".format(path=file_path)
+            f"Rhino WriteFile returned False for path: {file_path}"
         )
 
     return {
@@ -224,7 +223,7 @@ def handle_new_document(params):
     template = params.get("template_path") or params.get("template")
 
     if template:
-        command_str = '_-New "{tmpl}"'.format(tmpl=template)
+        command_str = f'_-New "{template}"'
         template_used = str(template)
     else:
         command_str = "_-New _None"
@@ -273,7 +272,7 @@ def handle_import_file(params):
     except Exception:
         pass
 
-    rs.Command('_-Import "{path}" _Enter'.format(path=file_path), echo=False)
+    rs.Command(f'_-Import "{file_path}" _Enter', echo=False)
 
     count_after = 0
     try:
@@ -329,7 +328,7 @@ def handle_export_objects(params):
 
     if not overwrite and os.path.exists(file_path):
         raise ValueError(
-            "File already exists and overwrite=False: {path}".format(path=file_path)
+            f"File already exists and overwrite=False: {file_path}"
         )
 
     # Deselect everything, then select only the requested objects.
@@ -351,7 +350,7 @@ def handle_export_objects(params):
             "None of the provided GUIDs could be found in the document."
         )
 
-    rs.Command('_-Export "{path}" _Enter'.format(path=file_path), echo=False)
+    rs.Command(f'_-Export "{file_path}" _Enter', echo=False)
 
     # Clean up selection state.
     try:
@@ -404,7 +403,7 @@ def handle_export_document(params):
 
     if not overwrite and os.path.exists(file_path):
         raise ValueError(
-            "File already exists and overwrite=False: {path}".format(path=file_path)
+            f"File already exists and overwrite=False: {file_path}"
         )
 
     if not selected_only:
@@ -414,7 +413,7 @@ def handle_export_document(params):
         except Exception:
             pass
 
-    rs.Command('_-Export "{path}" _Enter'.format(path=file_path), echo=False)
+    rs.Command(f'_-Export "{file_path}" _Enter', echo=False)
 
     object_count = 0
     try:
@@ -460,7 +459,7 @@ def handle_export_selected(params):
     if not file_path:
         raise ValueError("params['file_path'] is required for files.export_selected")
 
-    rs.Command('_-Export "{path}" _Enter'.format(path=file_path), echo=False)
+    rs.Command(f'_-Export "{file_path}" _Enter', echo=False)
 
     object_count = 0
     try:
@@ -499,7 +498,7 @@ def handle_open_document(params):
     if not file_path:
         raise ValueError("params['file_path'] is required for files.open_document")
 
-    rs.Command('_-Open "{path}"'.format(path=file_path), echo=False)
+    rs.Command(f'_-Open "{file_path}"', echo=False)
 
     return {
         "success": True,

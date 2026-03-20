@@ -64,15 +64,15 @@ def main() -> None:
     #    any other code imports ``golem_3dmcp.server`` to grab the ``mcp``
     #    object.
     from golem_3dmcp.tools import (  # noqa: F401  (imported for side effects)
-        scene,
         creation,
-        operations,
-        surfaces,
-        manipulation,
-        grasshopper,
-        viewport,
         files,
+        grasshopper,
+        manipulation,
+        operations,
+        scene,
         scripting,
+        surfaces,
+        viewport,
     )
 
     mcp.run(transport="stdio")

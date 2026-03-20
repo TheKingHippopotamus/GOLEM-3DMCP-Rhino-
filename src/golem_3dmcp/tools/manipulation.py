@@ -18,10 +18,10 @@ Registered tools:
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
-from golem_3dmcp.server import mcp
 from golem_3dmcp.connection import get_connection
+from golem_3dmcp.server import mcp
 
 
 def _send(method: str, params: dict) -> dict:
@@ -260,7 +260,7 @@ def align_objects(
 def distribute_objects(
     guids: list[str],
     axis: str = "x",
-    spacing: Optional[float] = None,
+    spacing: float | None = None,
 ) -> dict[str, Any]:
     """
     Distribute objects evenly along an axis.

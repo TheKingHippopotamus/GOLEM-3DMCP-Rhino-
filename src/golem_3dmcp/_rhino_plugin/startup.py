@@ -23,7 +23,6 @@ To send a command:   send a 'shutdown' method via the MCP client
 """
 
 import sys
-import os
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -41,21 +40,21 @@ project_root = "/Users/kinghippo/Documents/GOLEM-3DMCP"
 
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-    print("GOLEM-3DMCP: Added {path} to sys.path.".format(path=project_root))
+    print(f"GOLEM-3DMCP: Added {project_root} to sys.path.")
 
 # ---------------------------------------------------------------------------
 # Import server machinery
 # ---------------------------------------------------------------------------
 
 try:
-    from rhino_plugin.server import start_server, stop_server, _is_running  # noqa: E402
-    from rhino_plugin.dispatcher import get_registered_methods               # noqa: E402
+    from rhino_plugin.dispatcher import get_registered_methods  # noqa: E402
+    from rhino_plugin.server import _is_running, start_server, stop_server  # noqa: E402
 except Exception as _import_exc:
     print(
         "GOLEM-3DMCP: ERROR — Failed to import server modules.\n"
-        "  Ensure '{root}' is the correct project root and all\n"
+        f"  Ensure '{project_root}' is the correct project root and all\n"
         "  required packages are present.\n"
-        "  Detail: {exc}".format(root=project_root, exc=_import_exc)
+        f"  Detail: {_import_exc}"
     )
     raise
 
@@ -80,7 +79,7 @@ def stop_golem():
         stop_server()
         print("GOLEM-3DMCP: Server stopped.")
     except Exception as exc:
-        print("GOLEM-3DMCP: ERROR while stopping server — {exc}".format(exc=exc))
+        print(f"GOLEM-3DMCP: ERROR while stopping server — {exc}")
 
 
 def restart_golem(host=_HOST, port=_PORT):
@@ -95,8 +94,7 @@ def restart_golem(host=_HOST, port=_PORT):
         host: IP address to bind (default: 127.0.0.1).
         port: TCP port to listen on (default: 9876).
     """
-    print("GOLEM-3DMCP: Restarting server on {host}:{port}...".format(
-        host=host, port=port))
+    print(f"GOLEM-3DMCP: Restarting server on {host}:{port}...")
     if _is_running():
         stop_golem()
     _start(host, port)
@@ -107,31 +105,26 @@ def _start(host, port):
     """Internal helper: start the server and print diagnostics."""
     if _is_running():
         print(
-            "GOLEM-3DMCP: Server is already running on {host}:{port}. "
-            "Call restart_golem() to restart.".format(host=host, port=port)
+            f"GOLEM-3DMCP: Server is already running on {host}:{port}. "
+            "Call restart_golem() to restart."
         )
         return
 
-    print("GOLEM-3DMCP: Starting server on {host}:{port}...".format(
-        host=host, port=port))
+    print(f"GOLEM-3DMCP: Starting server on {host}:{port}...")
 
     try:
         start_server(host, port)
     except OSError as exc:
         print(
-            "GOLEM-3DMCP: ERROR — Could not bind {host}:{port}.\n"
+            f"GOLEM-3DMCP: ERROR — Could not bind {host}:{port}.\n"
             "  The port may already be in use by another process.\n"
-            "  Detail: {exc}\n"
-            "  Try: restart_golem() or change _PORT at the top of startup.py.".format(
-                host=host, port=port, exc=exc
-            )
+            f"  Detail: {exc}\n"
+            "  Try: restart_golem() or change _PORT at the top of startup.py."
         )
         return
     except Exception as exc:
         print(
-            "GOLEM-3DMCP: ERROR — Unexpected failure starting server: {exc}".format(
-                exc=exc
-            )
+            f"GOLEM-3DMCP: ERROR — Unexpected failure starting server: {exc}"
         )
         return
 
@@ -139,18 +132,16 @@ def _start(host, port):
     try:
         methods = sorted(get_registered_methods())
         print(
-            "GOLEM-3DMCP: Server started successfully on {host}:{port}.".format(
-                host=host, port=port
-            )
+            f"GOLEM-3DMCP: Server started successfully on {host}:{port}."
         )
-        print("GOLEM-3DMCP: {n} handler methods registered:".format(n=len(methods)))
+        print(f"GOLEM-3DMCP: {len(methods)} handler methods registered:")
         for method_name in methods:
-            print("    {method}".format(method=method_name))
+            print(f"    {method_name}")
     except Exception as exc:
         # Diagnostics failure is non-fatal; the server is already running.
         print(
             "GOLEM-3DMCP: Server started, but could not retrieve method list: "
-            "{exc}".format(exc=exc)
+            f"{exc}"
         )
 
 

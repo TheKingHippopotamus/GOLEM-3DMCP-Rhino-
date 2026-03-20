@@ -56,26 +56,24 @@ try:
     import Rhino
     import Rhino.Geometry as RG
     import Rhino.Geometry.Intersect as RGI
-    import scriptcontext as sc
     import rhinoscriptsyntax as rs
+    import scriptcontext as sc
     import System
     _RHINO_AVAILABLE = True
 except ImportError:
     _RHINO_AVAILABLE = False
 
-from typing import Any, Dict, List, Optional
 
 from rhino_plugin.dispatcher import handler
-from rhino_plugin.utils.error_handler import wrap_handler, GolemError, ErrorCode
-from rhino_plugin.utils.guid_registry import registry
+from rhino_plugin.utils.error_handler import ErrorCode, GolemError, wrap_handler
 from rhino_plugin.utils.geometry_serializer import (
     serialize_brep,
     serialize_curve,
     serialize_mesh,
-    serialize_surface,
     serialize_point3d,
+    serialize_surface,
 )
-
+from rhino_plugin.utils.guid_registry import registry
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -88,15 +86,11 @@ def _require(params, key, expected_type=None):
     it is absent or the wrong type.
     """
     if key not in params:
-        raise ValueError("Required parameter '{key}' is missing.".format(key=key))
+        raise ValueError(f"Required parameter '{key}' is missing.")
     value = params[key]
     if expected_type is not None and not isinstance(value, expected_type):
         raise ValueError(
-            "Parameter '{key}' must be a {tp} (got {actual}).".format(
-                key=key,
-                tp=expected_type.__name__,
-                actual=type(value).__name__,
-            )
+            f"Parameter '{key}' must be a {expected_type.__name__} (got {type(value).__name__})."
         )
     return value
 
@@ -107,7 +101,7 @@ def _coerce_guid(guid_str):
     try:
         return System.Guid(str(guid_str))
     except Exception:
-        raise ValueError("Invalid GUID string: '{g}'".format(g=guid_str))
+        raise ValueError(f"Invalid GUID string: '{guid_str}'")
 
 
 def _coerce_brep(guid_str):
@@ -119,7 +113,7 @@ def _coerce_brep(guid_str):
     if brep is None:
         raise GolemError(
             ErrorCode.INVALID_PARAMS,
-            "Object '{g}' is not a Brep.".format(g=guid_str),
+            f"Object '{guid_str}' is not a Brep.",
         )
     return brep
 
@@ -133,7 +127,7 @@ def _coerce_curve(guid_str):
     if curve is None:
         raise GolemError(
             ErrorCode.INVALID_PARAMS,
-            "Object '{g}' is not a Curve.".format(g=guid_str),
+            f"Object '{guid_str}' is not a Curve.",
         )
     return curve
 
@@ -147,7 +141,7 @@ def _coerce_surface(guid_str):
     if srf is None:
         raise GolemError(
             ErrorCode.INVALID_PARAMS,
-            "Object '{g}' is not a Surface.".format(g=guid_str),
+            f"Object '{guid_str}' is not a Surface.",
         )
     return srf
 
@@ -222,9 +216,7 @@ def _list_param(params, key):
     value = _require(params, key)
     if not isinstance(value, (list, tuple)):
         raise ValueError(
-            "Parameter '{key}' must be a list (got {tp}).".format(
-                key=key, tp=type(value).__name__
-            )
+            f"Parameter '{key}' must be a list (got {type(value).__name__})."
         )
     return list(value)
 
@@ -238,7 +230,7 @@ def _optional_float(params, key, default):
         return float(params[key])
     except (TypeError, ValueError):
         raise ValueError(
-            "Parameter '{key}' must be a number.".format(key=key)
+            f"Parameter '{key}' must be a number."
         )
 
 
@@ -257,7 +249,7 @@ def _optional_int(params, key, default):
         return int(params[key])
     except (TypeError, ValueError):
         raise ValueError(
-            "Parameter '{key}' must be an integer.".format(key=key)
+            f"Parameter '{key}' must be an integer."
         )
 
 
@@ -655,7 +647,7 @@ def offset_curve(params):
             offset_plane = RG.Plane(origin, x_axis, y_axis)
         except Exception as exc:
             raise ValueError(
-                "Invalid 'plane' parameter: {e}".format(e=exc)
+                f"Invalid 'plane' parameter: {exc}"
             )
     elif dir_raw is not None:
         if not isinstance(dir_raw, (list, tuple)) or len(dir_raw) < 3:
@@ -787,9 +779,7 @@ def fillet_edge(params):
     for i in edge_idx:
         if i < 0 or i >= edge_count:
             raise ValueError(
-                "Edge index {i} is out of range (Brep has {n} edges).".format(
-                    i=i, n=edge_count
-                )
+                f"Edge index {i} is out of range (Brep has {edge_count} edges)."
             )
 
     # CreateFilletEdges expects parallel arrays: indices, start/end radii, blend type.
@@ -1008,9 +998,7 @@ def chamfer_edge(params):
     for i in edge_idx:
         if i < 0 or i >= edge_count:
             raise ValueError(
-                "Edge index {i} is out of range (Brep has {n} edges).".format(
-                    i=i, n=edge_count
-                )
+                f"Edge index {i} is out of range (Brep has {edge_count} edges)."
             )
 
     start_distances = [distance] * len(edge_idx)
@@ -1037,9 +1025,7 @@ def chamfer_edge(params):
         rs.SelectObject(_coerce_guid(brep_id))
         edge_list = " ".join(str(i) for i in edge_idx)
         Rhino.RhinoApp.RunScript(
-            "_ChamferEdge Distance={d} {edges} _Enter _Enter".format(
-                d=distance, edges=edge_list
-            ),
+            f"_ChamferEdge Distance={distance} {edge_list} _Enter _Enter",
             False,
         )
         # After the command the original is replaced; try to find the new object.
@@ -1335,7 +1321,7 @@ def mesh_from_brep(params):
     if quality not in ("coarse", "medium", "fine", "custom"):
         raise ValueError(
             "quality must be one of 'coarse', 'medium', 'fine', or 'custom' "
-            "(got '{q}').".format(q=quality)
+            f"(got '{quality}')."
         )
 
     brep = _coerce_brep(brep_id)
@@ -1488,7 +1474,7 @@ def extend_curve(params):
     if extension_type_str not in _ext_type_map:
         raise ValueError(
             "extension_type must be 'line', 'arc', or 'smooth' "
-            "(got '{t}').".format(t=extension_type_str)
+            f"(got '{extension_type_str}')."
         )
     ext_style = _ext_type_map[extension_type_str]
 
@@ -1500,7 +1486,7 @@ def extend_curve(params):
     }
     if side_str not in _side_map:
         raise ValueError(
-            "side must be 'start', 'end', or 'both' (got '{s}').".format(s=side_str)
+            f"side must be 'start', 'end', or 'both' (got '{side_str}')."
         )
     curve_end = _side_map[side_str]
 
@@ -1515,7 +1501,7 @@ def extend_curve(params):
         if boundary_obj is None:
             raise GolemError(
                 ErrorCode.OBJECT_NOT_FOUND,
-                "Boundary object not found: '{g}'".format(g=boundary_id),
+                f"Boundary object not found: '{boundary_id}'",
             )
         boundary_geom = boundary_obj.Geometry
         # Build a list of GeometryBase for the boundary.
@@ -1580,7 +1566,7 @@ def blend_curves(params):
     if continuity_str not in _cont_map:
         raise ValueError(
             "continuity must be 'position', 'tangent', or 'curvature' "
-            "(got '{c}').".format(c=continuity_str)
+            f"(got '{continuity_str}')."
         )
     continuity = _cont_map[continuity_str]
 
@@ -1638,12 +1624,10 @@ def rebuild_curve(params):
     point_count = _optional_int(params, "point_count", 10)
 
     if degree < 1 or degree > 11:
-        raise ValueError("degree must be between 1 and 11 (got {d}).".format(d=degree))
+        raise ValueError(f"degree must be between 1 and 11 (got {degree}).")
     if point_count < degree + 1:
         raise ValueError(
-            "point_count must be at least degree + 1 (degree={d}, point_count={p}).".format(
-                d=degree, p=point_count
-            )
+            f"point_count must be at least degree + 1 (degree={degree}, point_count={point_count})."
         )
 
     curve = _coerce_curve(curve_id)
@@ -1702,18 +1686,18 @@ def rebuild_surface(params):
     for label, deg in (("degree_u", degree_u), ("degree_v", degree_v)):
         if deg < 1 or deg > 11:
             raise ValueError(
-                "{l} must be between 1 and 11 (got {d}).".format(l=label, d=deg)
+                f"{label} must be between 1 and 11 (got {deg})."
             )
 
     if point_count_u < degree_u + 1:
         raise ValueError(
             "point_count_u must be at least degree_u + 1 "
-            "(degree_u={d}, point_count_u={p}).".format(d=degree_u, p=point_count_u)
+            f"(degree_u={degree_u}, point_count_u={point_count_u})."
         )
     if point_count_v < degree_v + 1:
         raise ValueError(
             "point_count_v must be at least degree_v + 1 "
-            "(degree_v={d}, point_count_v={p}).".format(d=degree_v, p=point_count_v)
+            f"(degree_v={degree_v}, point_count_v={point_count_v})."
         )
 
     registry.validate_guid(surface_id)

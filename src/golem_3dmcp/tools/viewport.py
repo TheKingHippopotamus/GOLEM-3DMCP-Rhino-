@@ -16,10 +16,10 @@ Registered tools:
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
-from golem_3dmcp.server import mcp
 from golem_3dmcp.connection import get_connection
+from golem_3dmcp.server import mcp
 
 
 def _send(method: str, params: dict) -> dict:
@@ -32,10 +32,10 @@ def _send(method: str, params: dict) -> dict:
 
 @mcp.tool()
 def capture_viewport(
-    view_name: Optional[str] = None,
+    view_name: str | None = None,
     width: int = 1920,
     height: int = 1080,
-    display_mode: Optional[str] = None,
+    display_mode: str | None = None,
     transparent_background: bool = False,
 ) -> dict[str, Any]:
     """
@@ -84,8 +84,8 @@ def set_camera(
     target_x: float = 0.0,
     target_y: float = 0.0,
     target_z: float = 0.0,
-    view_name: Optional[str] = None,
-    lens_length: Optional[float] = None,
+    view_name: str | None = None,
+    lens_length: float | None = None,
 ) -> dict[str, Any]:
     """
     Set the camera position and target for a Rhino viewport.
@@ -107,7 +107,7 @@ def set_camera(
 
 @mcp.tool()
 def zoom_extents(
-    view_name: Optional[str] = None,
+    view_name: str | None = None,
     selected_only: bool = False,
 ) -> dict[str, Any]:
     """
@@ -124,7 +124,7 @@ def zoom_extents(
 
 
 @mcp.tool()
-def zoom_selected(guids: list[str], view_name: Optional[str] = None) -> dict[str, Any]:
+def zoom_selected(guids: list[str], view_name: str | None = None) -> dict[str, Any]:
     """
     Zoom to show specific objects in a viewport.
 
@@ -145,7 +145,7 @@ def zoom_selected(guids: list[str], view_name: Optional[str] = None) -> dict[str
 @mcp.tool()
 def set_display_mode(
     mode: str = "Shaded",
-    view_name: Optional[str] = None,
+    view_name: str | None = None,
 ) -> dict[str, Any]:
     """
     Change the display mode of a Rhino viewport.
@@ -167,7 +167,7 @@ def set_background_color(
     r: int = 255,
     g: int = 255,
     b: int = 255,
-    view_name: Optional[str] = None,
+    view_name: str | None = None,
 ) -> dict[str, Any]:
     """
     Set the background colour of a Rhino viewport.
@@ -189,7 +189,7 @@ def set_background_color(
 @mcp.tool()
 def add_named_view(
     view_name_to_save_as: str,
-    source_view_name: Optional[str] = None,
+    source_view_name: str | None = None,
 ) -> dict[str, Any]:
     """
     Save the current camera position of a viewport as a named view.
@@ -207,7 +207,7 @@ def add_named_view(
 @mcp.tool()
 def restore_named_view(
     named_view: str,
-    target_view_name: Optional[str] = None,
+    target_view_name: str | None = None,
     animate: bool = True,
 ) -> dict[str, Any]:
     """

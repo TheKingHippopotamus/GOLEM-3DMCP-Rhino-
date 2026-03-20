@@ -13,21 +13,18 @@ import json
 import socket
 import struct
 import threading
-import time
-from typing import Any
-from unittest.mock import MagicMock, patch, call, PropertyMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+import golem_3dmcp.connection as _conn_module
 from golem_3dmcp.connection import (
+    RhinoCommandError,
     RhinoConnection,
     RhinoConnectionError,
-    RhinoCommandError,
     RhinoTimeoutError,
     get_connection,
 )
-import golem_3dmcp.connection as _conn_module
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -267,7 +264,7 @@ class TestSendCommandErrors:
 
     def test_raises_rhino_timeout_error_on_socket_timeout(self, conn):
         """A socket.timeout during recv must raise RhinoTimeoutError (not retried)."""
-        conn._sock.recv.side_effect = socket.timeout("timed out")
+        conn._sock.recv.side_effect = TimeoutError("timed out")
         with pytest.raises(RhinoTimeoutError):
             conn.send_command("slow.command", {}, timeout=1)
 
@@ -298,7 +295,7 @@ class TestSendCommandErrors:
 
     def test_timeout_is_not_retried(self, conn):
         """RhinoTimeoutError must propagate without retry."""
-        conn._sock.recv.side_effect = socket.timeout("timed out")
+        conn._sock.recv.side_effect = TimeoutError("timed out")
 
         with pytest.raises(RhinoTimeoutError):
             conn.send_command("slow.op", {})

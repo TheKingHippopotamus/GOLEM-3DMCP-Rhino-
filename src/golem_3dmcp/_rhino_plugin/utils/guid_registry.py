@@ -22,7 +22,6 @@ Usage example::
 """
 
 import datetime
-from typing import Dict, List, Optional
 
 try:
     import scriptcontext as sc
@@ -66,7 +65,7 @@ class GuidRegistry:
         if len(normalised) != 36:
             raise ValueError(
                 "Invalid GUID format (expected 36 characters after stripping braces): "
-                "'{guid}'".format(guid=guid)
+                f"'{guid}'"
             )
         return normalised
 
@@ -218,7 +217,7 @@ class GuidRegistry:
         key = self._normalise(guid)
         if not self.exists(key):
             raise KeyError(
-                "Object not found in Rhino document: '{guid}'".format(guid=guid)
+                f"Object not found in Rhino document: '{guid}'"
             )
         return key
 

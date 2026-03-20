@@ -14,13 +14,11 @@ Commands:
 
 from __future__ import annotations
 
-import os
 import platform
 import shutil
 import socket
 import sys
 from pathlib import Path
-from typing import Optional
 
 import click
 
@@ -28,11 +26,14 @@ import click
 # Rhino scripts directory detection
 # ---------------------------------------------------------------------------
 
-def _rhino_scripts_dir() -> Optional[Path]:
+def _rhino_scripts_dir() -> Path | None:
     """Return the platform-specific Rhino 8 scripts directory, or None."""
     system = platform.system()
     if system == "Darwin":
-        p = Path.home() / "Library" / "Application Support" / "McNeel" / "Rhinoceros" / "8.0" / "scripts"
+        p = (
+            Path.home() / "Library" / "Application Support"
+            / "McNeel" / "Rhinoceros" / "8.0" / "scripts"
+        )
         return p if p.parent.exists() else None
     elif system == "Windows":
         p = Path.home() / "AppData" / "Roaming" / "McNeel" / "Rhinoceros" / "8.0" / "scripts"
@@ -90,7 +91,10 @@ def install_rhino():
 
     source = _plugin_source_dir()
     if not source.exists():
-        _print("[red]Error:[/red] Bundled plugin not found. Reinstall golem-3dmcp.", style="bold red")
+        _print(
+            "[red]Error:[/red] Bundled plugin not found. Reinstall golem-3dmcp.",
+            style="bold red",
+        )
         raise SystemExit(1)
 
     target = _rhino_scripts_dir()
@@ -162,7 +166,7 @@ def doctor():
     """Diagnose the GOLEM-3DMCP environment and connection."""
     try:
         from rich.console import Console
-        from rich.table import Table
+        from rich.table import Table  # noqa: F401
         console = Console()
         use_rich = True
     except ImportError:
@@ -170,7 +174,7 @@ def doctor():
         use_rich = False
 
     from golem_3dmcp import __version__
-    from golem_3dmcp.config import RHINO_HOST, RHINO_PORT, RHINO_GH_PORT
+    from golem_3dmcp.config import RHINO_GH_PORT, RHINO_HOST, RHINO_PORT
 
     checks = []
 
@@ -208,7 +212,7 @@ def doctor():
         try:
             with socket.create_connection((host, port), timeout=2):
                 return True
-        except (OSError, socket.timeout):
+        except (TimeoutError, OSError):
             return False
 
     port_ok = _check_port(RHINO_HOST, RHINO_PORT)
@@ -265,7 +269,7 @@ def config():
     try:
         from rich.console import Console
         from rich.panel import Panel
-        from rich.syntax import Syntax
+        from rich.syntax import Syntax  # noqa: F401
         console = Console()
         use_rich = True
     except ImportError:

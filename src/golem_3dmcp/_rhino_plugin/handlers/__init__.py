@@ -23,7 +23,7 @@ files        — Open, save, import, export
 scripting    — Execute Python / RhinoScript, run Rhino commands
 """
 
-from rhino_plugin.dispatcher import register_handlers_from_module, get_registered_methods
+from rhino_plugin.dispatcher import get_registered_methods, register_handlers_from_module
 
 
 def register_all_handlers():
@@ -42,15 +42,17 @@ def register_all_handlers():
     int
         Total number of registered method names after all modules are loaded.
     """
-    from rhino_plugin.handlers import scene
-    from rhino_plugin.handlers import creation
-    from rhino_plugin.handlers import operations
-    from rhino_plugin.handlers import surfaces
-    from rhino_plugin.handlers import manipulation
-    from rhino_plugin.handlers import grasshopper
-    from rhino_plugin.handlers import viewport
-    from rhino_plugin.handlers import files
-    from rhino_plugin.handlers import scripting
+    from rhino_plugin.handlers import (
+        creation,
+        files,
+        grasshopper,
+        manipulation,
+        operations,
+        scene,
+        scripting,
+        surfaces,
+        viewport,
+    )
 
     modules = [
         scene,
