@@ -1,7 +1,7 @@
 """
 tests/test_protocol.py
 =======================
-Unit tests for mcp_server/protocol.py — the length-prefixed JSON message
+Unit tests for golem_3dmcp/protocol.py — the length-prefixed JSON message
 framing layer.
 
 All tests use mock sockets or raw byte buffers; no real TCP connections are
@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 
-from mcp_server.protocol import send_message, recv_message
+from golem_3dmcp.protocol import send_message, recv_message
 
 
 # ---------------------------------------------------------------------------

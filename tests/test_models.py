@@ -2,9 +2,9 @@
 tests/test_models.py
 =====================
 Unit tests for all Pydantic v2 models in:
-  - mcp_server/models/common.py
-  - mcp_server/models/geometry.py
-  - mcp_server/models/scene.py
+  - golem_3dmcp/models/common.py
+  - golem_3dmcp/models/geometry.py
+  - golem_3dmcp/models/scene.py
 
 Tests cover:
   - Default construction
@@ -23,7 +23,7 @@ from pydantic import ValidationError
 # ---------------------------------------------------------------------------
 # common.py
 # ---------------------------------------------------------------------------
-from mcp_server.models.common import (
+from golem_3dmcp.models.common import (
     Point3D,
     Vector3D,
     Plane,
@@ -35,7 +35,7 @@ from mcp_server.models.common import (
 # ---------------------------------------------------------------------------
 # geometry.py
 # ---------------------------------------------------------------------------
-from mcp_server.models.geometry import (
+from golem_3dmcp.models.geometry import (
     ObjectAttributes,
     BoxParams,
     SphereParams,
@@ -57,7 +57,7 @@ from mcp_server.models.geometry import (
 # ---------------------------------------------------------------------------
 # scene.py
 # ---------------------------------------------------------------------------
-from mcp_server.models.scene import (
+from golem_3dmcp.models.scene import (
     DocumentInfo,
     LayerInfo,
     LayerCreateParams,

@@ -58,3 +58,7 @@ secrets.json
 # Logs
 *.log
 logs/
+
+# PyPI / packaging
+*.whl
+.eggs/

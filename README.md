@@ -4,6 +4,7 @@
 
 **The most powerful MCP server for Rhinoceros 3D — 105 tools giving Claude full read/write access to Rhino 8.**
 
+[![PyPI](https://img.shields.io/pypi/v/golem-3dmcp.svg)](https://pypi.org/project/golem-3dmcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Rhino 8](https://img.shields.io/badge/Rhino-8.x-blue.svg)](https://www.rhino3d.com/)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-green.svg)](https://python.org)
@@ -41,6 +42,41 @@ GOLEM-3DMCP implements the [Model Context Protocol](https://modelcontextprotocol
   <img src="screenshots/city_street.png" alt="GOLEM City — Street Level" width="800"/>
 </p>
 <p align="center"><em>Street level — vehicles, people, street lamps, stadium, harbor with boats</em></p>
+
+---
+
+## Install in 30 seconds
+
+### 1. Install the MCP server
+```bash
+pip install golem-3dmcp
+```
+
+### 2. Deploy the Rhino plugin (one-time)
+```bash
+golem install-rhino
+```
+
+### 3. Add to your AI agent
+
+**Claude Code / Cursor / Windsurf / any MCP host:**
+```json
+{
+  "mcpServers": {
+    "golem-3dmcp": {
+      "command": "uvx",
+      "args": ["golem-3dmcp"]
+    }
+  }
+}
+```
+
+### 4. Verify
+```bash
+golem doctor
+```
+
+That's it. Start talking to Rhino through AI.
 
 ---
 
@@ -101,18 +137,17 @@ See [docs/TOOL_REFERENCE.md](docs/TOOL_REFERENCE.md) for the complete reference 
 
 ## Quick Start
 
-### 1. Clone and set up
+### 1. Install and set up
 
 ```bash
-git clone git@github.com:TheKingHippopotamus/GOLEM-3DMCP-Rhino-.git
-cd GOLEM-3DMCP-Rhino-
-bash setup.sh
+pip install golem-3dmcp
+golem install-rhino
 ```
 
 ### 2. Load the plugin into Rhino
 
 Open Rhino 8, then open the Script Editor (`Tools > Python Script > Edit`).
-Open `rhino_plugin/startup.py` and click **Run**.
+Open `startup.py` (deployed by `golem install-rhino`) and click **Run**.
 
 ```
 GOLEM-3DMCP: Starting server on 127.0.0.1:9876...
@@ -145,55 +180,6 @@ Open Claude Code and try:
 | macOS | 12 Monterey or newer |
 
 The Rhino plugin runs inside Rhino's embedded Python 3.9 with zero external dependencies.
-
----
-
-## Installation
-
-### Automated
-
-```bash
-bash setup.sh
-```
-
-This will:
-1. Find Python 3.10+ (pyenv, homebrew, or system)
-2. Create `.venv` and install dependencies
-3. Optionally install the Rhino startup script
-4. Optionally configure Claude Code MCP settings
-
-### Manual
-
-```bash
-python3.12 -m venv .venv
-.venv/bin/pip install -e ".[dev]"
-```
-
-| Dependency | Purpose |
-|------------|---------|
-| `mcp[cli]>=1.0.0` | MCP server framework (FastMCP) |
-| `pydantic>=2.0.0` | Data validation and models |
-| `httpx>=0.24.0` | Async HTTP (MCP internals) |
-
-### Loading the Rhino Plugin
-
-**Option A — Manual (each session):**
-Open Rhino > Script Editor > Open `startup.py` > Run
-
-**Option B — Auto-start (recommended):**
-`Tools > Options > RhinoScript > Startup Scripts > Add startup.py`
-
-**Option C — rhinocode CLI:**
-```bash
-export PATH="/Applications/Rhino 8.app/Contents/Resources/bin:$PATH"
-python scripts/start_rhino_server.py
-```
-
-### Verify Connection
-
-```bash
-.venv/bin/python scripts/test_connection.py
-```
 
 ---
 
@@ -248,44 +234,24 @@ __result__ = {"point_count": len(pts), "length": crv.GetLength()}
 ## Project Structure
 
 ```
-GOLEM-3DMCP/
-├── mcp_server/                 # Part B: MCP Server (Python 3.10+)
-│   ├── server.py               #   FastMCP entry point
-│   ├── connection.py           #   TCP client (singleton, thread-safe, auto-reconnect)
-│   ├── protocol.py             #   Wire format: 4-byte length prefix + JSON
-│   ├── config.py               #   Environment variable configuration
-│   ├── models/                 #   Pydantic data models
-│   └── tools/                  #   9 MCP tool modules
+golem-3dmcp/
+├── src/golem_3dmcp/           # MCP Server package (Python 3.10+)
+│   ├── __init__.py            #   Package init + version
+│   ├── __main__.py            #   python -m entry point
+│   ├── cli.py                 #   CLI (golem command)
+│   ├── server.py              #   FastMCP entry point
+│   ├── connection.py          #   TCP client (singleton, thread-safe)
+│   ├── protocol.py            #   Wire format: 4-byte length prefix + JSON
+│   ├── config.py              #   Environment variable configuration
+│   ├── models/                #   Pydantic data models
+│   ├── tools/                 #   9 MCP tool modules
+│   └── _rhino_plugin/         #   Bundled Rhino plugin (deployed via golem install-rhino)
 │
-├── rhino_plugin/               # Part A: Rhino Plugin (Python 3.9)
-│   ├── server.py               #   TCP server (runs inside Rhino)
-│   ├── startup.py              #   Bootstrap: start/stop/restart
-│   ├── dispatcher.py           #   Handler registry + routing
-│   ├── protocol.py             #   Wire format (byte-compatible)
-│   ├── handlers/               #   9 handler modules (the actual Rhino code)
-│   │   ├── scene.py            #     Scene intelligence
-│   │   ├── creation.py         #     Geometry creation
-│   │   ├── operations.py       #     Booleans, offset, fillet, intersect
-│   │   ├── surfaces.py         #     Loft, sweep, revolve, extrude
-│   │   ├── manipulation.py     #     Transform, copy, group, properties
-│   │   ├── grasshopper.py      #     GH definition control
-│   │   ├── viewport.py         #     View capture and camera
-│   │   ├── files.py            #     File I/O and export
-│   │   └── scripting.py        #     Arbitrary code execution
-│   ├── grasshopper/            #   GH sub-server and utilities
-│   └── utils/                  #   Serializers, GUID registry, error handler
-│
-├── scripts/                    # Setup and utility scripts
-│   ├── install_plugin.py       #   Auto-install Rhino startup script
-│   ├── start_rhino_server.py   #   Start via rhinocode CLI
-│   ├── test_connection.py      #   Connection diagnostics
-│   └── configure_claude.py     #   Configure Claude Code MCP settings
-│
-├── tests/                      # 226 tests (pytest)
-├── docs/                       # Architecture, protocol spec, tool reference
-├── setup.sh                    # One-command setup
-├── pyproject.toml              # Package definition
-└── .mcp.json                   # Claude Code MCP configuration
+├── tests/                     # 226 tests (pytest)
+├── docs/                      # Architecture, protocol spec, tool reference
+├── .github/workflows/         # CI/CD (test + PyPI publish)
+├── pyproject.toml             # Package definition
+└── .mcp.json                  # Example MCP configuration
 ```
 
 ---
@@ -303,13 +269,13 @@ GOLEM-3DMCP/
 
 ```bash
 # Unit tests (no Rhino needed)
-.venv/bin/python -m pytest tests/ -v --ignore=tests/test_integration.py
+pytest tests/ -v --ignore=tests/test_integration.py
 
 # Full suite (integration tests auto-skip if Rhino not running)
-.venv/bin/python -m pytest tests/ -v
+pytest tests/ -v
 
 # Integration tests only (requires Rhino + plugin running)
-.venv/bin/python -m pytest tests/test_integration.py -v -m integration
+pytest tests/test_integration.py -v -m integration
 ```
 
 ---
@@ -320,7 +286,7 @@ GOLEM-3DMCP/
 |---------|-----------|
 | Connection refused | Start Rhino + run `startup.py` |
 | Port already in use | `lsof -i :9876` then kill the process |
-| MCP server not in Claude | Run `python scripts/configure_claude.py` |
+| MCP server not in Claude | Run `claude mcp add --config .mcp.json` |
 | Grasshopper tools fail | Open Grasshopper in Rhino first |
 | Python version error | Need Python 3.10+ for MCP server |
 

@@ -1,7 +1,7 @@
 """
 tests/test_connection.py
 =========================
-Unit tests for mcp_server/connection.py — the RhinoConnection TCP client
+Unit tests for golem_3dmcp/connection.py — the RhinoConnection TCP client
 and the get_connection() singleton.
 
 All network I/O is replaced with mocks; no live socket connections are made.
@@ -19,14 +19,14 @@ from unittest.mock import MagicMock, patch, call, PropertyMock
 
 import pytest
 
-from mcp_server.connection import (
+from golem_3dmcp.connection import (
     RhinoConnection,
     RhinoConnectionError,
     RhinoCommandError,
     RhinoTimeoutError,
     get_connection,
 )
-import mcp_server.connection as _conn_module
+import golem_3dmcp.connection as _conn_module
 
 
 # ---------------------------------------------------------------------------
@@ -133,7 +133,7 @@ class TestConnectDisconnect:
         mock_sock = _make_mock_socket(
             _success_response({"pong": True})
         )
-        with patch("mcp_server.connection.socket.socket", return_value=mock_sock):
+        with patch("golem_3dmcp.connection.socket.socket", return_value=mock_sock):
             c = RhinoConnection()
             c.connect(host="127.0.0.1", port=9876, timeout=5)
 
@@ -145,7 +145,7 @@ class TestConnectDisconnect:
         """If the TCP handshake fails, RhinoConnectionError is raised."""
         mock_sock = MagicMock(spec=socket.socket)
         mock_sock.connect.side_effect = OSError("connection refused")
-        with patch("mcp_server.connection.socket.socket", return_value=mock_sock):
+        with patch("golem_3dmcp.connection.socket.socket", return_value=mock_sock):
             c = RhinoConnection()
             with pytest.raises(RhinoConnectionError, match="connection refused"):
                 c.connect()
@@ -155,7 +155,7 @@ class TestConnectDisconnect:
         mock_sock = _make_mock_socket(
             _error_response(code=503, message="not ready")
         )
-        with patch("mcp_server.connection.socket.socket", return_value=mock_sock):
+        with patch("golem_3dmcp.connection.socket.socket", return_value=mock_sock):
             c = RhinoConnection()
             with pytest.raises(RhinoConnectionError):
                 c.connect()
@@ -499,7 +499,7 @@ class TestGetConnectionSingleton:
         mock_conn = MagicMock(spec=RhinoConnection)
         mock_conn.is_connected.return_value = True
 
-        with patch("mcp_server.connection.RhinoConnection", return_value=mock_conn):
+        with patch("golem_3dmcp.connection.RhinoConnection", return_value=mock_conn):
             result = get_connection(host="127.0.0.1", port=9876)
 
         mock_conn.connect.assert_called_once_with(
@@ -519,7 +519,7 @@ class TestGetConnectionSingleton:
         fresh_conn = MagicMock(spec=RhinoConnection)
         fresh_conn.is_connected.return_value = True
 
-        with patch("mcp_server.connection.RhinoConnection", return_value=fresh_conn):
+        with patch("golem_3dmcp.connection.RhinoConnection", return_value=fresh_conn):
             result = get_connection(host="127.0.0.1", port=9876)
 
         fresh_conn.connect.assert_called_once()
@@ -532,7 +532,7 @@ class TestGetConnectionSingleton:
         mock_conn = MagicMock(spec=RhinoConnection)
         mock_conn.is_connected.return_value = True
 
-        with patch("mcp_server.connection.RhinoConnection", return_value=mock_conn):
+        with patch("golem_3dmcp.connection.RhinoConnection", return_value=mock_conn):
             get_connection(host="127.0.0.1", port=9876)
 
         assert _conn_module._singleton is mock_conn

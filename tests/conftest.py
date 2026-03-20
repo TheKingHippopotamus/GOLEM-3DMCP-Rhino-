@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from mcp_server.connection import RhinoConnection, RhinoConnectionError
+from golem_3dmcp.connection import RhinoConnection, RhinoConnectionError
 
 
 # ---------------------------------------------------------------------------
@@ -103,7 +103,7 @@ def mock_connection():
 
         def test_tool(mock_connection, monkeypatch):
             mock_connection.default_result = {"file_path": "/tmp/model.3dm"}
-            monkeypatch.setattr("mcp_server.tools.scene.get_connection",
+            monkeypatch.setattr("golem_3dmcp.tools.scene.get_connection",
                                 lambda: mock_connection)
             result = get_document_info()
             assert result["file_path"] == "/tmp/model.3dm"

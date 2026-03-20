@@ -6,7 +6,7 @@ Unit tests for MCP tool functions with a mocked RhinoConnection.
 Strategy
 --------
 Each tool module calls ``get_connection()`` at invocation time via its own
-module-local reference ``mcp_server.tools.{module}.get_connection``.  We
+module-local reference ``golem_3dmcp.tools.{module}.get_connection``.  We
 patch that attribute directly on the already-imported module so the tool
 function sees our fake connection regardless of how many times the module
 has been imported.
@@ -31,13 +31,13 @@ import pytest
 # correct way to intercept the call.
 # ---------------------------------------------------------------------------
 
-import mcp_server.tools.scene as _scene_mod
-import mcp_server.tools.creation as _creation_mod
-import mcp_server.tools.operations as _operations_mod
-import mcp_server.tools.manipulation as _manipulation_mod
-import mcp_server.tools.viewport as _viewport_mod
-import mcp_server.tools.files as _files_mod
-import mcp_server.tools.scripting as _scripting_mod
+import golem_3dmcp.tools.scene as _scene_mod
+import golem_3dmcp.tools.creation as _creation_mod
+import golem_3dmcp.tools.operations as _operations_mod
+import golem_3dmcp.tools.manipulation as _manipulation_mod
+import golem_3dmcp.tools.viewport as _viewport_mod
+import golem_3dmcp.tools.files as _files_mod
+import golem_3dmcp.tools.scripting as _scripting_mod
 
 
 # ---------------------------------------------------------------------------
