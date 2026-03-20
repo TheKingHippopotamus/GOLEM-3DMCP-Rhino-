@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/king-hippo.svg" alt="GOLEM-3DMCP" width="200"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/king-hippo.png" alt="GOLEM-3DMCP" width="200"/>
 </p>
 
 <h1 align="center">GOLEM-3DMCP</h1>
@@ -312,7 +312,7 @@ MIT License. See [LICENSE](https://github.com/TheKingHippopotamus/GOLEM-3DMCP-Rh
 ## Credits
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/king-hippo.svg" alt="King Hippopotamus" width="200"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/king-hippo.png" alt="King Hippopotamus" width="200"/>
 </p>
 
 <p align="center">
@@ -321,19 +321,19 @@ MIT License. See [LICENSE](https://github.com/TheKingHippopotamus/GOLEM-3DMCP-Rh
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/CEO.svg" alt="CEO" width="100" title="CEO — The Lion"/>
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/CTO.svg" alt="CTO" width="100" title="CTO — The Owl"/>
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/CPO.svg" alt="CPO" width="100" title="CPO — The Fox"/>
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/COO.svg" alt="COO" width="100" title="COO — The Bear"/>
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/CFO.svg" alt="CFO" width="100" title="CFO — The Cobra"/>
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/CISO.svg" alt="CISO" width="100" title="CISO — The Scorpion"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/CEO.png" alt="CEO" width="100" title="CEO — The Lion"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/CTO.png" alt="CTO" width="100" title="CTO — The Owl"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/CPO.png" alt="CPO" width="100" title="CPO — The Fox"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/COO.png" alt="COO" width="100" title="COO — The Bear"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/CFO.png" alt="CFO" width="100" title="CFO — The Cobra"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/CISO.png" alt="CISO" width="100" title="CISO — The Scorpion"/>
 </p>
 <p align="center">
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/CMO.svg" alt="CMO" width="100" title="CMO — The Peacock"/>
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/CRO.svg" alt="CRO" width="100" title="CRO — The Wolf"/>
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/CHRO.svg" alt="CHRO" width="100" title="CHRO — The Elephant"/>
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/CLO.svg" alt="CLO" width="100" title="CLO — The Raven"/>
-  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-svgs/CAIO.svg" alt="CAIO" width="100" title="CAIO — The Octopus"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/CMO.png" alt="CMO" width="100" title="CMO — The Peacock"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/CRO.png" alt="CRO" width="100" title="CRO — The Wolf"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/CHRO.png" alt="CHRO" width="100" title="CHRO — The Elephant"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/CLO.png" alt="CLO" width="100" title="CLO — The Raven"/>
+  <img src="https://raw.githubusercontent.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/claude/pypi-package-setup-PMCI5/nexus-pngs/CAIO.png" alt="CAIO" width="100" title="CAIO — The Octopus"/>
 </p>
 
 ---
