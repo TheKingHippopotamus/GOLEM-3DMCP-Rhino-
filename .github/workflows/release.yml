@@ -1,3 +1,10 @@
+# NOTE: PyPI publishing uses OIDC trusted publishing (no API tokens needed).
+# To enable, configure a trusted publisher on PyPI and TestPyPI for this repo:
+#   PyPI:     https://pypi.org/manage/account/publishing/
+#   TestPyPI: https://test.pypi.org/manage/account/publishing/
+# Publisher settings: owner=TheKingHippopotamus, repo=GOLEM-3DMCP, workflow=release.yml
+# Until configured, the publish-test and publish jobs will fail gracefully
+# (continue-on-error: true) and will not block the GitHub Release from being created.
 name: Release to PyPI
 
 on:
@@ -55,6 +62,7 @@ jobs:
   publish-test:
     needs: build
     runs-on: ubuntu-latest
+    continue-on-error: true
     environment: test-pypi
     steps:
       - uses: actions/download-artifact@v4
@@ -67,8 +75,9 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
 
   publish:
-    needs: publish-test
+    needs: build
     runs-on: ubuntu-latest
+    continue-on-error: true
     environment: pypi
     steps:
       - uses: actions/download-artifact@v4
