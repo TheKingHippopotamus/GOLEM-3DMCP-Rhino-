@@ -54,7 +54,7 @@ def _plugin_source_dir() -> Path:
 # ---------------------------------------------------------------------------
 
 @click.group()
-def main():
+def main() -> None:
     """GOLEM-3DMCP — MCP server for Rhinoceros 3D."""
     pass
 
@@ -64,7 +64,7 @@ def main():
 # ---------------------------------------------------------------------------
 
 @main.command()
-def start():
+def start() -> None:
     """Start the GOLEM MCP server (stdio mode)."""
     from golem_3dmcp.server import main as server_main
     server_main()
@@ -75,7 +75,7 @@ def start():
 # ---------------------------------------------------------------------------
 
 @main.command("install-rhino")
-def install_rhino():
+def install_rhino() -> None:
     """Deploy the Rhino plugin to the platform-specific scripts directory."""
     try:
         from rich.console import Console
@@ -131,7 +131,7 @@ def install_rhino():
 # ---------------------------------------------------------------------------
 
 @main.command("uninstall-rhino")
-def uninstall_rhino():
+def uninstall_rhino() -> None:
     """Remove the Rhino plugin from the scripts directory."""
     target = _rhino_scripts_dir()
     if target is None:
@@ -162,7 +162,7 @@ def uninstall_rhino():
 # ---------------------------------------------------------------------------
 
 @main.command()
-def doctor():
+def doctor() -> None:
     """Diagnose the GOLEM-3DMCP environment and connection."""
     try:
         from rich.console import Console
@@ -237,6 +237,7 @@ def doctor():
 
     # Output
     if use_rich:
+        assert console is not None
         console.print("\n[bold]GOLEM-3DMCP Health Check[/bold]")
         console.print("━" * 45)
         for label, value, ok in checks:
@@ -264,7 +265,7 @@ def doctor():
 # ---------------------------------------------------------------------------
 
 @main.command()
-def config():
+def config() -> None:
     """Print MCP configuration JSON snippets for various agents."""
     try:
         from rich.console import Console
@@ -304,6 +305,7 @@ def config():
 }'''
 
     if use_rich:
+        assert console is not None
         console.print()
         console.print(Panel.fit(
             "[bold]GOLEM-3DMCP Configuration[/bold]\n\n"
@@ -337,7 +339,7 @@ def config():
 # ---------------------------------------------------------------------------
 
 @main.command()
-def version():
+def version() -> None:
     """Print version and platform info."""
     from golem_3dmcp import __version__
     click.echo(f"golem-3dmcp {__version__}")

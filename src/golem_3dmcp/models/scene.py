@@ -131,7 +131,7 @@ class ObjectInfo(BaseModel):
     visible: bool = Field(default=True)
     locked: bool = Field(default=False)
     bounding_box: BoundingBox | None = Field(default=None)
-    user_text: dict = Field(
+    user_text: dict[str, str] = Field(
         default_factory=dict,
         description="All user-text key-value pairs attached to the object.",
     )

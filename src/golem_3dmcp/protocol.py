@@ -23,6 +23,7 @@ Author: GOLEM-3DMCP
 import json
 import socket
 import struct
+from typing import Any, cast
 
 # Header is a single big-endian unsigned 32-bit integer (4 bytes).
 _HEADER_FORMAT = "!I"
@@ -67,7 +68,7 @@ def _recv_exactly(sock: socket.socket, num_bytes: int) -> bytes:
 # Public API
 # ---------------------------------------------------------------------------
 
-def send_message(sock: socket.socket, data: dict) -> None:
+def send_message(sock: socket.socket, data: dict[str, Any]) -> None:
     """
     Serialize *data* to JSON and send it over *sock* with a 4-byte length
     prefix (big-endian uint32).
@@ -93,7 +94,7 @@ def send_message(sock: socket.socket, data: dict) -> None:
     sock.sendall(header + payload)
 
 
-def recv_message(sock: socket.socket) -> dict:
+def recv_message(sock: socket.socket) -> dict[str, Any]:
     """
     Receive one length-prefixed JSON message from *sock*.
 
@@ -129,4 +130,4 @@ def recv_message(sock: socket.socket) -> dict:
     raw_payload = _recv_exactly(sock, payload_length)
 
     # Step 3: Decode UTF-8 and parse JSON.
-    return json.loads(raw_payload.decode("utf-8"))
+    return cast(dict[str, Any], json.loads(raw_payload.decode("utf-8")))

@@ -440,12 +440,9 @@ class TestThreadSafety:
         conn._sock.recv.side_effect = lambda n: _drain(buf, n)
 
         # Patch sendall to signal thread coordination
-        original_sendall = conn._sock.sendall
-
         def slow_sendall(data: bytes) -> None:
             entered_first.set()
             can_finish.wait(timeout=2)
-            original_sendall(data)
 
         conn._sock.sendall.side_effect = slow_sendall
 

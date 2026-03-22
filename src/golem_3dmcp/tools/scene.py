@@ -20,7 +20,7 @@ from golem_3dmcp.connection import get_connection
 from golem_3dmcp.server import mcp
 
 
-def _send(method: str, params: dict) -> dict:
+def _send(method: str, params: dict[str, Any]) -> dict[str, Any]:
     """Convenience wrapper: get connection and send a command."""
     conn = get_connection()
     return conn.send_command(method, params)

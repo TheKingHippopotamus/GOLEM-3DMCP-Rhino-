@@ -12,6 +12,8 @@ Python >= 3.10 is assumed on the MCP server side (see pyproject.toml).
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 # ---------------------------------------------------------------------------
@@ -109,7 +111,7 @@ class OperationResult(BaseModel):
     guids: list[str] | None = None
     success: bool = True
     message: str | None = None
-    data: dict | None = None
+    data: dict[str, Any] | None = None
 
     @classmethod
     def ok(
@@ -117,12 +119,12 @@ class OperationResult(BaseModel):
         guid: str | None = None,
         guids: list[str] | None = None,
         message: str | None = None,
-        data: dict | None = None,
+        data: dict[str, Any] | None = None,
     ) -> OperationResult:
         """Convenience constructor for successful results."""
         return cls(guid=guid, guids=guids, success=True, message=message, data=data)
 
     @classmethod
-    def fail(cls, message: str, data: dict | None = None) -> OperationResult:
+    def fail(cls, message: str, data: dict[str, Any] | None = None) -> OperationResult:
         """Convenience constructor for failed results."""
         return cls(success=False, message=message, data=data)

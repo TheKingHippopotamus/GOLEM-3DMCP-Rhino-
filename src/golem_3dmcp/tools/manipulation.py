@@ -24,7 +24,7 @@ from golem_3dmcp.connection import get_connection
 from golem_3dmcp.server import mcp
 
 
-def _send(method: str, params: dict) -> dict:
+def _send(method: str, params: dict[str, Any]) -> dict[str, Any]:
     return get_connection().send_command(method, params)
 
 

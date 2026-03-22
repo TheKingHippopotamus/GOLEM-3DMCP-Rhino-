@@ -20,6 +20,7 @@ Author: GOLEM-3DMCP
 import socket
 import threading
 import uuid
+from typing import Any
 
 from golem_3dmcp.protocol import recv_message, send_message
 
@@ -194,9 +195,9 @@ class RhinoConnection:
     def send_command(
         self,
         method: str,
-        params: dict,
+        params: dict[str, Any],
         timeout: int = 30,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Send a command to Rhino and wait for the response.
 
@@ -253,7 +254,7 @@ class RhinoConnection:
             f"{self._MAX_AUTO_RECONNECT_ATTEMPTS} attempts: {last_exc}"
         ) from last_exc
 
-    def _send_and_recv(self, request: dict, timeout: int) -> dict:
+    def _send_and_recv(self, request: dict[str, Any], timeout: int) -> dict[str, Any]:
         """
         Internal: acquire the lock, send *request*, receive one response.
 
@@ -349,7 +350,7 @@ def get_connection(
     # Resolve defaults from config.
     if host is None or port is None:
         try:
-            from golem_3dmcp import config as _cfg  # type: ignore
+            from golem_3dmcp import config as _cfg
             _default_host = getattr(_cfg, "RHINO_HOST", "127.0.0.1")
             _default_port = getattr(_cfg, "RHINO_PORT", 9876)
         except ImportError:

@@ -89,6 +89,13 @@ ignore = [
 [tool.mypy]
 python_version = "3.10"
 strict = true
+exclude = ["src/golem_3dmcp/_rhino_plugin/"]
+
+[[tool.mypy.overrides]]
+module = "golem_3dmcp.tools.*"
+# mcp package provides untyped decorators when mypy runs without mcp stubs;
+# disable untyped-decorator for tool modules to avoid cascade noise.
+disable_error_code = ["untyped-decorator"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
