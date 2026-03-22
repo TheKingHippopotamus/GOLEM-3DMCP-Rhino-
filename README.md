@@ -17,6 +17,7 @@
   <a href="https://www.rhino3d.com/"><img src="https://img.shields.io/badge/Rhino-8.x-blue.svg" alt="Rhino 8"></a>
   <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.10+-green.svg" alt="Python 3.10+"></a>
   <a href="https://modelcontextprotocol.io/"><img src="https://img.shields.io/badge/Protocol-MCP-purple.svg" alt="MCP"></a>
+  <a href="https://glama.ai/mcp/servers/TheKingHippopotamus/GOLEM-3DMCP-Rhino-"><img src="https://glama.ai/mcp/servers/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/badge" alt="GOLEM-3DMCP MCP server"></a>
 </p>
 
 ---
@@ -363,6 +364,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 ## License
 
 MIT License. See [LICENSE](https://github.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/blob/claude/pypi-package-setup-PMCI5/LICENSE) for details.
+
+---
+
+## MCP Server on Glama
+
+<a href="https://glama.ai/mcp/servers/TheKingHippopotamus/GOLEM-3DMCP-Rhino-">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/badge?type=card" alt="GOLEM-3DMCP server on Glama" />
+</a>
 
 ---
 

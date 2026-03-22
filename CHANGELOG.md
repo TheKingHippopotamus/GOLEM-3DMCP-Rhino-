@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-22
+
 ### Added
+- `glama.json` metadata file for Glama.ai MCP directory integration
+- Dockerfile for container-based server inspection and tool detection
+- `.dockerignore` for optimized Docker builds
+- Docker build & push workflow (GitHub Container Registry)
+- GitHub Release creation in release workflow (alongside PyPI publish)
+- Glama.ai score and card badges in README
+- Related MCP servers metadata (blender-mcp, filesystem, github)
+- Full tool inventory (87 tools) in glama.json for automated detection
 - PyPI package distribution (`pip install golem-3dmcp`)
 - CLI tool with commands: `golem start`, `golem install-rhino`, `golem uninstall-rhino`, `golem doctor`, `golem config`, `golem version`
 - Cross-platform Rhino plugin deployment (macOS, Windows, Linux)
@@ -20,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Restructured from `mcp_server/` to `src/golem_3dmcp/` (src layout)
 - Bundled `rhino_plugin/` as `_rhino_plugin` package data
 - Updated all internal imports from `mcp_server` to `golem_3dmcp`
+- Release workflow now creates GitHub Releases with auto-generated notes
 
 ## [0.1.0] - 2026-03-20
 
