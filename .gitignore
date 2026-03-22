@@ -59,6 +59,9 @@ secrets.json
 *.log
 logs/
 
+# Node
+node_modules/
+
 # PyPI / packaging
 *.whl
 .eggs/

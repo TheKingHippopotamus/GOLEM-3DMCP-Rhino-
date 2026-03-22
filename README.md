@@ -303,6 +303,63 @@ golem-3dmcp/
 
 ---
 
+## Contributing
+
+We welcome contributions! Here's how to get started:
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-.git
+cd GOLEM-3DMCP-Rhino-
+
+# Create virtual environment (Python 3.10+ required)
+python -m venv .venv
+source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+pip install -e ".[dev]"
+
+# Install pre-commit hooks
+pre-commit install
+```
+
+### Code Quality
+
+All CI checks must pass before merging:
+
+```bash
+# Lint
+ruff check src/ tests/
+
+# Type check (strict mode)
+mypy src/golem_3dmcp/ --ignore-missing-imports
+
+# Unit tests (no Rhino needed)
+pytest tests/ -v --ignore=tests/test_integration.py
+
+# Integration tests (requires Rhino 8 + plugin running)
+pytest tests/test_integration.py -v -m integration
+```
+
+### Key Things to Know
+
+- **Two Python runtimes** — The MCP server runs on Python 3.10+, but `_rhino_plugin/` runs inside Rhino's embedded Python 3.9. They communicate over TCP. Don't add 3.10+ syntax to the plugin.
+- **`_rhino_plugin/` is excluded from mypy** — It uses Rhino-specific imports (`Rhino.*`, `Grasshopper.*`, `clr`) that don't exist in a standard environment.
+- **Tool registration** — Tools use `@mcp.tool()` decorators. Each tool module imports `mcp` from `server.py`. Add new tools in `src/golem_3dmcp/tools/` and register the module in `server.py:main()`.
+- **Thread safety** — `RhinoConnection` is a thread-safe singleton with a lock around socket I/O. Don't bypass `send_command()`.
+- **Protocol** — TCP messages use 4-byte length-prefixed JSON. See `protocol.py` for the wire format.
+
+### Pull Request Process
+
+1. Create a feature branch from `main`
+2. Make your changes
+3. Ensure all checks pass (`ruff`, `mypy`, `pytest`)
+4. Submit a PR with a clear description
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
+
+---
+
 ## License
 
 MIT License. See [LICENSE](https://github.com/TheKingHippopotamus/GOLEM-3DMCP-Rhino-/blob/claude/pypi-package-setup-PMCI5/LICENSE) for details.
