@@ -32,6 +32,9 @@ COPY pyproject.toml README.md LICENSE ./
 COPY src/ ./src/
 
 # Install the package
+# Set fallback version for builds without .git (setuptools-scm / hatch-vcs)
+ARG SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}
 RUN pip install --no-cache-dir .
 
 # Default environment variables
