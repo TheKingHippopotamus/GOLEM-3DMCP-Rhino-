@@ -84,7 +84,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"src/golem_3dmcp/_rhino_plugin/**" = ["F841", "F401"]  # Plugin runs inside Rhino — some vars/imports used implicitly
+"src/golem_3dmcp/_rhino_plugin/**" = ["E501", "F841", "F401", "I001", "UP"]  # Plugin runs inside Rhino (IronPython 2.7) — skip upgrade rules, import sorting, line length
 
 [tool.mypy]
 python_version = "3.10"
