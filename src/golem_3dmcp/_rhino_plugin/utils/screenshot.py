@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/utils/screenshot.py
 ==================================
@@ -5,7 +6,7 @@ Capture a Rhino viewport to a base64-encoded PNG string.
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax.
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax.
 * Zero external dependencies beyond what Rhino ships (System.Drawing,
   System.IO, the built-in ``base64`` module).
 * Runs **inside Rhino 3D** where ``Rhino``, ``System``, and
@@ -19,6 +20,10 @@ Display mode names accepted (case-insensitive) examples:
 """
 
 import base64
+try:
+    from typing import Dict, Optional
+except ImportError:
+    pass
 
 try:
     import Rhino
@@ -80,7 +85,7 @@ def capture_viewport_to_base64(
 
     Raises
     ------
-    Does not raise — all exceptions are caught and returned as error dicts.
+    Does not raise -- all exceptions are caught and returned as error dicts.
     """
     if not _RHINO_AVAILABLE:
         return {
@@ -104,7 +109,7 @@ def capture_viewport_to_base64(
 
         if view is None:
             return {
-                "error": f"View not found: '{view_name}'",
+                "error": "View not found: '{name}'".format(name=view_name),
                 "code": "OBJECT_NOT_FOUND",
             }
     else:
@@ -166,7 +171,7 @@ def capture_viewport_to_base64(
             except Exception:
                 pass
         return {
-            "error": f"CaptureToBitmap failed: {repr(exc)}",
+            "error": "CaptureToBitmap failed: {exc}".format(exc=repr(exc)),
             "code": "OPERATION_FAILED",
         }
 
@@ -207,7 +212,7 @@ def capture_viewport_to_base64(
             except Exception:
                 pass
         return {
-            "error": f"Failed to encode bitmap as PNG: {repr(exc)}",
+            "error": "Failed to encode bitmap as PNG: {exc}".format(exc=repr(exc)),
             "code": "INTERNAL_ERROR",
         }
     finally:

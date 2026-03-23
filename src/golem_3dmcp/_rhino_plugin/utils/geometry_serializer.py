@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/utils/geometry_serializer.py
 ==========================================
@@ -5,7 +6,7 @@ Convert RhinoCommon geometry objects to plain JSON-serialisable Python dicts.
 
 Design notes
 ------------
-* Runs **inside Rhino 3D** under Python 3.9 — no external deps, no
+* Runs **inside Rhino 3D** under Python 3.9 -- no external deps, no
   ``match``/``case``, no ``X | Y`` union syntax.
 * Every property access is wrapped in try/except because many geometry types
   do not expose all properties (e.g. a LineCurve has no NURBS knots, a
@@ -25,10 +26,10 @@ Imports that only resolve inside Rhino:
 # The try/except lets linters and unit-test runners import the module without
 # exploding; at runtime inside Rhino they will always succeed.
 try:
-    import Rhino  # noqa: F401
+    import Rhino                          # noqa: F401
     import Rhino.Geometry as RG
-    import rhinoscriptsyntax as rs  # noqa: F401
     import scriptcontext as sc
+    import rhinoscriptsyntax as rs        # noqa: F401
     import System
     _RHINO_AVAILABLE = True
 except ImportError:
@@ -569,16 +570,16 @@ def serialize_object(rhino_object):
     geometry) to a comprehensive dict suitable for returning to an MCP tool.
 
     Includes:
-    - ``guid`` — object GUID as a string
-    - ``type`` — geometry type string
-    - ``layer`` — layer name
-    - ``name`` — object name (may be empty string)
-    - ``color`` — ``{"r", "g", "b", "a"}``
-    - ``visible`` — bool
-    - ``locked`` — bool
-    - ``geometry`` — geometry summary from :func:`serialize_any`
-    - ``bounding_box`` — ``{"min", "max"}``
-    - ``user_text`` — ``{key: value}`` dict of all custom user data
+    - ``guid`` -- object GUID as a string
+    - ``type`` -- geometry type string
+    - ``layer`` -- layer name
+    - ``name`` -- object name (may be empty string)
+    - ``color`` -- ``{"r", "g", "b", "a"}``
+    - ``visible`` -- bool
+    - ``locked`` -- bool
+    - ``geometry`` -- geometry summary from :func:`serialize_any`
+    - ``bounding_box`` -- ``{"min", "max"}``
+    - ``user_text`` -- ``{key: value}`` dict of all custom user data
     """
     result = {
         "guid": None,

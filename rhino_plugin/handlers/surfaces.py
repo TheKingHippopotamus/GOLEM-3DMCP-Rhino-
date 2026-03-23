@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/surfaces.py
 ===================================
@@ -10,7 +11,7 @@ planar_surface.
 Design notes
 ------------
 * Runs INSIDE Rhino 3D under Python 3.9.
-* Zero external dependencies — only Python stdlib + Rhino/RhinoCommon APIs.
+* Zero external dependencies -- only Python stdlib + Rhino/RhinoCommon APIs.
 * Python 3.9 compatible: no ``match``/``case``, no ``X | Y`` union syntax,
   no lowercase ``dict[...]`` / ``list[...]`` generics in annotations.
 * Every handler is registered via ``@handler("surfaces.<name>")`` from
@@ -20,7 +21,7 @@ Design notes
 * GUID validation delegates to
   :class:`~rhino_plugin.utils.guid_registry.GuidRegistry`, whose
   :meth:`validate_guid` / :meth:`validate_guids` raise ``KeyError`` (message
-  contains ``"not found"``) when an object is absent — the dispatcher maps
+  contains ``"not found"``) when an object is absent -- the dispatcher maps
   this to ``OBJECT_NOT_FOUND``.
 * Bounding-box serialisation uses
   :func:`~rhino_plugin.utils.geometry_serializer.serialize_bounding_box`.
@@ -34,10 +35,13 @@ Rhino imports resolved at runtime:
 """
 
 import math
-from typing import Any, Dict, List, Optional
+try:
+    from typing import Any, Dict, List, Optional
+except ImportError:
+    pass
 
 # ---------------------------------------------------------------------------
-# Rhino imports — guarded so linters outside Rhino do not explode.
+# Rhino imports -- guarded so linters outside Rhino do not explode.
 # ---------------------------------------------------------------------------
 
 try:
@@ -626,7 +630,7 @@ def extrude_curve(params):
     result_id = None
 
     if direction_raw is not None:
-        # Direction mode — build a straight extrusion vector.
+        # Direction mode -- build a straight extrusion vector.
         if not (isinstance(direction_raw, (list, tuple)) and len(direction_raw) == 3):
             raise ValueError("'direction' must be a list [x, y, z].")
         dx, dy, dz = (float(v) for v in direction_raw)
@@ -652,7 +656,7 @@ def extrude_curve(params):
                 "rs.ExtrudeCurveStraight failed: {exc}".format(exc=exc),
             )
     else:
-        # Path mode — extrude along an existing curve.
+        # Path mode -- extrude along an existing curve.
         registry.validate_guid(path_id)
         try:
             result_id = rs.ExtrudeCurve(curve_id, path_id)
@@ -1042,7 +1046,7 @@ def cap_planar_holes(params):
     # operation failed.  In that case we still return the original GUID so the
     # caller is not left empty-handed; but we signal the condition via a flag.
     if result_id is None:
-        # Not necessarily a hard failure — the brep may have had no planar
+        # Not necessarily a hard failure -- the brep may have had no planar
         # holes. Return the original GUID and flag it.
         sc.doc.Views.Redraw()
         return {

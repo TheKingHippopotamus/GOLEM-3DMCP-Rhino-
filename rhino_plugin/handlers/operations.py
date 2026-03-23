@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/operations.py
 =====================================
@@ -8,16 +9,16 @@ Covers:
   - Trim / Split          (trim, split)
   - Offset                (offset_curve, offset_surface)
   - Fillet / Chamfer      (fillet_edge, fillet_curves, chamfer_curves, chamfer_edge)
-  - Intersection          (intersect — auto-detects curve/surface combinations)
+  - Intersection          (intersect -- auto-detects curve/surface combinations)
   - Meshing               (mesh_from_brep)
   - Curve operations      (project_curve, extend_curve, blend_curves, rebuild_curve,
                            rebuild_surface)
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax,
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax,
   no lower-case ``dict[str, ...]`` / ``list[str]`` generics in runtime annotations.
-* Zero external dependencies — only stdlib, Rhino, and rhinoscriptsyntax.
+* Zero external dependencies -- only stdlib, Rhino, and rhinoscriptsyntax.
 * All handlers are decorated with both ``@handler`` (dispatcher registration)
   and ``@wrap_handler`` (consistent exception-to-error-dict conversion).
 * Booleans delete their input objects on success (as the Rhino UI does).
@@ -49,7 +50,7 @@ Registers the following dispatcher methods::
 """
 
 # ---------------------------------------------------------------------------
-# Rhino imports — wrapped in try/except so linters & test runners can import
+# Rhino imports -- wrapped in try/except so linters & test runners can import
 # this module without exploding.  At runtime inside Rhino all will succeed.
 # ---------------------------------------------------------------------------
 try:
@@ -63,7 +64,10 @@ try:
 except ImportError:
     _RHINO_AVAILABLE = False
 
-from typing import Any, Dict, List, Optional
+try:
+    from typing import Any, Dict, List, Optional
+except ImportError:
+    pass
 
 from rhino_plugin.dispatcher import handler
 from rhino_plugin.utils.error_handler import wrap_handler, GolemError, ErrorCode
@@ -294,7 +298,7 @@ def boolean_union(params):
     if results is None or len(results) == 0:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Boolean union failed — check that all objects are valid, closed Breps "
+            "Boolean union failed -- check that all objects are valid, closed Breps "
             "and that they actually intersect.",
         )
 
@@ -345,7 +349,7 @@ def boolean_difference(params):
     if results is None or len(results) == 0:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Boolean difference failed — ensure the cutter actually intersects "
+            "Boolean difference failed -- ensure the cutter actually intersects "
             "the target and both are valid closed Breps.",
         )
 
@@ -396,7 +400,7 @@ def boolean_intersection(params):
     if results is None or len(results) == 0:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Boolean intersection failed — the Breps may not intersect or may be "
+            "Boolean intersection failed -- the Breps may not intersect or may be "
             "geometrically invalid.",
         )
 
@@ -446,7 +450,7 @@ def boolean_split(params):
     if results is None or len(results) == 0:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Boolean split failed — ensure the cutter intersects the target Brep.",
+            "Boolean split failed -- ensure the cutter intersects the target Brep.",
         )
 
     _delete_object(guid_to_split)
@@ -509,7 +513,7 @@ def trim(params):
     if results is None or len(results) == 0:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Trim failed — the cutter may not intersect the target.",
+            "Trim failed -- the cutter may not intersect the target.",
         )
 
     # Keep only the piece(s) closest to the pick point.
@@ -571,7 +575,7 @@ def split(params):
     if result_rhino_guids is None or len(result_rhino_guids) == 0:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Split failed — the cutters may not intersect the target Brep.",
+            "Split failed -- the cutters may not intersect the target Brep.",
         )
 
     registry.unregister(object_id)
@@ -678,7 +682,7 @@ def offset_curve(params):
     if result_guids is None or len(result_guids) == 0:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Offset curve failed — check that the curve and plane are valid.",
+            "Offset curve failed -- check that the curve and plane are valid.",
         )
 
     first_guid = str(result_guids[0])
@@ -726,7 +730,7 @@ def offset_surface(params):
     if result_guid is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Offset surface failed — the surface may be degenerate or the distance "
+            "Offset surface failed -- the surface may be degenerate or the distance "
             "may cause self-intersection.",
         )
 
@@ -812,7 +816,7 @@ def fillet_edge(params):
     if results is None or len(results) == 0:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Fillet edge failed — the radius may be too large for the selected edges, "
+            "Fillet edge failed -- the radius may be too large for the selected edges, "
             "or the Brep geometry may be invalid.",
         )
 
@@ -874,7 +878,7 @@ def fillet_curves(params):
     if fillet_guid is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Fillet curves failed — the curves may be non-coplanar, parallel, or the "
+            "Fillet curves failed -- the curves may be non-coplanar, parallel, or the "
             "radius may be too large.",
         )
 
@@ -951,7 +955,7 @@ def chamfer_curves(params):
     if chamfer_guid is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Chamfer curves failed — the curves may not intersect or the distances "
+            "Chamfer curves failed -- the curves may not intersect or the distances "
             "may be too large.",
         )
 
@@ -1033,7 +1037,7 @@ def chamfer_edge(params):
             tol,
         )
     except AttributeError:
-        # BlendType.Chamfer not available — fall back to a Rhino command.
+        # BlendType.Chamfer not available -- fall back to a Rhino command.
         rs.SelectObject(_coerce_guid(brep_id))
         edge_list = " ".join(str(i) for i in edge_idx)
         Rhino.RhinoApp.RunScript(
@@ -1048,7 +1052,7 @@ def chamfer_edge(params):
     if results is None or len(results) == 0:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Chamfer edge failed — the distance may be too large for the selected "
+            "Chamfer edge failed -- the distance may be too large for the selected "
             "edges or the Brep geometry may be invalid.",
         )
 
@@ -1238,7 +1242,7 @@ def intersect(params):
                     pass
 
     if not point_guids and not curve_guids:
-        # No intersection found — return an informative result, not an error.
+        # No intersection found -- return an informative result, not an error.
         sc.doc.Views.Redraw()
         return {
             "type": intersection_type,
@@ -1373,7 +1377,7 @@ def mesh_from_brep(params):
     if meshes is None or len(meshes) == 0:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Mesh from Brep failed — the Brep may be invalid or non-manifold.",
+            "Mesh from Brep failed -- the Brep may be invalid or non-manifold.",
         )
 
     result_guids = [_add_mesh_to_doc(m) for m in meshes]
@@ -1432,7 +1436,7 @@ def project_curve(params):
     if projected is None or len(projected) == 0:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Project curve failed — the curve projection may miss all target Breps "
+            "Project curve failed -- the curve projection may miss all target Breps "
             "in the given direction.",
         )
 
@@ -1531,7 +1535,7 @@ def extend_curve(params):
     if result_curve is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Extend curve failed — check the extension type, side, and boundary.",
+            "Extend curve failed -- check the extension type, side, and boundary.",
         )
 
     # Replace the original curve in the document.
@@ -1597,7 +1601,7 @@ def blend_curves(params):
     if blend is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Blend curves failed — the curves may have incompatible end conditions "
+            "Blend curves failed -- the curves may have incompatible end conditions "
             "for the requested continuity.",
         )
 
@@ -1653,7 +1657,7 @@ def rebuild_curve(params):
     if rebuilt is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Rebuild curve failed — the curve may not support NURBS rebuilding.",
+            "Rebuild curve failed -- the curve may not support NURBS rebuilding.",
         )
 
     sys_orig = _coerce_guid(curve_id)
@@ -1727,7 +1731,7 @@ def rebuild_surface(params):
     if result is False or result is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Rebuild surface failed — ensure the object is a single NURBS surface.",
+            "Rebuild surface failed -- ensure the object is a single NURBS surface.",
         )
 
     srf = rs.coercesurface(sys_guid)

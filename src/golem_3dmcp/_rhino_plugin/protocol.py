@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/protocol.py
 ========================
@@ -9,7 +10,7 @@ Wire format:
 This module runs INSIDE Rhino 3D with Python 3.9. It must:
   - Use ONLY Python stdlib (no third-party packages).
   - Be compatible with Python 3.9 (no match/case, no X|Y union syntax).
-  - Handle TCP fragmentation correctly — a single send() can arrive as
+  - Handle TCP fragmentation correctly -- a single send() can arrive as
     multiple recv() calls, so every read loops until the exact byte count
     is satisfied.
 
@@ -17,7 +18,12 @@ Author: GOLEM-3DMCP
 """
 
 import json
+import socket
 import struct
+try:
+    from typing import Dict, Any, Optional
+except ImportError:
+    pass
 
 # Header is a single big-endian unsigned 32-bit integer (4 bytes).
 _HEADER_FORMAT = "!I"
@@ -33,7 +39,7 @@ def _recv_exactly(sock, num_bytes):
     """
     Read exactly *num_bytes* from *sock*, blocking until all bytes arrive.
 
-    TCP is a stream protocol — recv() may return fewer bytes than requested
+    TCP is a stream protocol -- recv() may return fewer bytes than requested
     if the kernel buffer is not yet full, or if the sender transmitted the
     data in multiple segments.  This helper loops until the full count is
     satisfied or the connection is closed/broken.
@@ -52,7 +58,10 @@ def _recv_exactly(sock, num_bytes):
             # recv() returning b"" means the peer closed the connection.
             raise ConnectionError(
                 "Connection closed by remote peer after receiving "
-                f"{num_bytes - remaining}/{num_bytes} bytes"
+                "{received}/{expected} bytes".format(
+                    received=num_bytes - remaining,
+                    expected=num_bytes,
+                )
             )
         buf += chunk
         remaining -= len(chunk)
@@ -87,7 +96,9 @@ def send_message(sock, data):
     payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
     if len(payload) > 0xFFFFFFFF:
         raise ValueError(
-            f"Message payload too large: {len(payload)} bytes (max 4294967295)"
+            "Message payload too large: {size} bytes (max 4294967295)".format(
+                size=len(payload)
+            )
         )
     header = struct.pack(_HEADER_FORMAT, len(payload))
     # sendall() keeps sending until every byte is transmitted, handling
@@ -123,7 +134,10 @@ def recv_message(sock):
     _MAX_PAYLOAD = 64 * 1024 * 1024  # 64 MB
     if payload_length > _MAX_PAYLOAD:
         raise ValueError(
-            f"Incoming message too large: {payload_length} bytes (max {_MAX_PAYLOAD})"
+            "Incoming message too large: {size} bytes (max {limit})".format(
+                size=payload_length,
+                limit=_MAX_PAYLOAD,
+            )
         )
 
     # Step 2: Read exactly payload_length bytes for the JSON body.

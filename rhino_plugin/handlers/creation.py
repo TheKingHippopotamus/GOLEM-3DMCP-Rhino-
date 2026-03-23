@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/creation.py
 ==================================
@@ -12,7 +13,7 @@ Python 3.9 compatibility
 * No ``match``/``case`` statements.
 * No ``X | Y`` union type syntax.
 * No lowercase ``dict[...]`` / ``list[...]`` generics in runtime annotations.
-* Zero external dependencies — only Python stdlib + Rhino APIs.
+* Zero external dependencies -- only Python stdlib + Rhino APIs.
 
 Wire method names (must match ``mcp_server/tools/creation.py`` exactly):
     creation.create_box
@@ -30,7 +31,10 @@ Wire method names (must match ``mcp_server/tools/creation.py`` exactly):
 """
 
 import math
-from typing import Any, Dict, List, Optional, Union
+try:
+    from typing import Any, Dict, List, Optional, Union
+except ImportError:
+    pass
 
 try:
     import Rhino                                   # noqa: F401
@@ -97,12 +101,12 @@ def create_box(params):
 
     Params
     ------
-    corner_x, corner_y, corner_z : float — minimum corner (default 0)
-    width   : float — X dimension (default 1)
-    depth   : float — Y dimension (default 1)
-    height  : float — Z dimension (default 1)
-    layer   : str   — optional layer full path
-    name    : str   — optional object name
+    corner_x, corner_y, corner_z : float -- minimum corner (default 0)
+    width   : float -- X dimension (default 1)
+    depth   : float -- Y dimension (default 1)
+    height  : float -- Z dimension (default 1)
+    layer   : str   -- optional layer full path
+    name    : str   -- optional object name
 
     Returns
     -------
@@ -154,10 +158,10 @@ def create_sphere(params):
 
     Params
     ------
-    center_x, center_y, center_z : float — sphere centre (default 0)
-    radius : float — sphere radius (default 1)
-    layer  : str   — optional layer full path
-    name   : str   — optional object name
+    center_x, center_y, center_z : float -- sphere centre (default 0)
+    radius : float -- sphere radius (default 1)
+    layer  : str   -- optional layer full path
+    name   : str   -- optional object name
 
     Returns
     -------
@@ -200,12 +204,12 @@ def create_cylinder(params):
 
     Params
     ------
-    base_x, base_y, base_z : float — centre of the base circle (default 0)
-    radius : float — cylinder radius (default 1)
-    height : float — cylinder height along Z (default 1)
-    cap    : bool  — cap both ends (default True)
-    layer  : str   — optional layer full path
-    name   : str   — optional object name
+    base_x, base_y, base_z : float -- centre of the base circle (default 0)
+    radius : float -- cylinder radius (default 1)
+    height : float -- cylinder height along Z (default 1)
+    cap    : bool  -- cap both ends (default True)
+    layer  : str   -- optional layer full path
+    name   : str   -- optional object name
 
     Returns
     -------
@@ -254,12 +258,12 @@ def create_cone(params):
 
     Params
     ------
-    base_x, base_y, base_z : float — centre of the base circle (default 0)
-    radius : float — base radius (default 1)
-    height : float — cone height (default 1)
-    cap    : bool  — cap the base (default True)
-    layer  : str   — optional layer full path
-    name   : str   — optional object name
+    base_x, base_y, base_z : float -- centre of the base circle (default 0)
+    radius : float -- base radius (default 1)
+    height : float -- cone height (default 1)
+    cap    : bool  -- cap the base (default True)
+    layer  : str   -- optional layer full path
+    name   : str   -- optional object name
 
     Returns
     -------
@@ -307,11 +311,11 @@ def create_torus(params):
 
     Params
     ------
-    center_x, center_y, center_z : float — torus centre (default 0)
-    major_radius : float — distance from torus centre to tube centre (default 2)
-    minor_radius : float — tube radius (default 0.5)
-    layer        : str   — optional layer full path
-    name         : str   — optional object name
+    center_x, center_y, center_z : float -- torus centre (default 0)
+    major_radius : float -- distance from torus centre to tube centre (default 2)
+    minor_radius : float -- tube radius (default 0.5)
+    layer        : str   -- optional layer full path
+    name         : str   -- optional object name
 
     Returns
     -------
@@ -362,10 +366,10 @@ def create_line(params):
 
     Params
     ------
-    start_x, start_y, start_z : float — start point (default 0)
-    end_x,   end_y,   end_z   : float — end point (default 1 on X)
-    layer : str  — optional layer full path
-    name  : str  — optional object name
+    start_x, start_y, start_z : float -- start point (default 0)
+    end_x,   end_y,   end_z   : float -- end point (default 1 on X)
+    layer : str  -- optional layer full path
+    name  : str  -- optional object name
 
     Returns
     -------
@@ -409,10 +413,10 @@ def create_circle(params):
 
     Params
     ------
-    center_x, center_y, center_z : float — circle centre (default 0)
-    radius : float — circle radius (default 1)
-    layer  : str   — optional layer full path
-    name   : str   — optional object name
+    center_x, center_y, center_z : float -- circle centre (default 0)
+    radius : float -- circle radius (default 1)
+    layer  : str   -- optional layer full path
+    name   : str   -- optional object name
 
     Returns
     -------
@@ -452,12 +456,12 @@ def create_arc(params):
 
     Params
     ------
-    center_x, center_y, center_z : float — arc centre (default 0)
-    radius      : float — arc radius (default 1)
-    start_angle : float — start angle in degrees (default 0)
-    end_angle   : float — end angle in degrees (default 90)
-    layer : str  — optional layer full path
-    name  : str  — optional object name
+    center_x, center_y, center_z : float -- arc centre (default 0)
+    radius      : float -- arc radius (default 1)
+    start_angle : float -- start angle in degrees (default 0)
+    end_angle   : float -- end angle in degrees (default 90)
+    layer : str  -- optional layer full path
+    name  : str  -- optional object name
 
     Returns
     -------
@@ -508,10 +512,10 @@ def create_polyline(params):
 
     Params
     ------
-    points : list of {x, y, z} dicts — at least 2 required
-    closed : bool — close the polyline (default False)
-    layer  : str  — optional layer full path
-    name   : str  — optional object name
+    points : list of {x, y, z} dicts -- at least 2 required
+    closed : bool -- close the polyline (default False)
+    layer  : str  -- optional layer full path
+    name   : str  -- optional object name
 
     Returns
     -------
@@ -563,10 +567,10 @@ def create_nurbs_curve(params):
 
     Params
     ------
-    control_points : list of {x, y, z} dicts — at least 2 required
-    degree         : int  — curve degree (default 3; clamped to 1..11)
-    layer          : str  — optional layer full path
-    name           : str  — optional object name
+    control_points : list of {x, y, z} dicts -- at least 2 required
+    degree         : int  -- curve degree (default 3; clamped to 1..11)
+    layer          : str  -- optional layer full path
+    name           : str  -- optional object name
 
     Returns
     -------
@@ -627,9 +631,9 @@ def create_point(params):
 
     Params
     ------
-    x, y, z : float — point coordinates (default 0)
-    layer   : str   — optional layer full path
-    name    : str   — optional object name
+    x, y, z : float -- point coordinates (default 0)
+    layer   : str   -- optional layer full path
+    name    : str   -- optional object name
 
     Returns
     -------
@@ -663,14 +667,14 @@ def create_text(params):
 
     Params
     ------
-    text           : str   — text content (required)
-    x, y, z        : float — insertion point (default 0)
-    height         : float — text height in model units (default 1)
-    font           : str   — font face name (default "Arial")
-    bold           : bool  — bold weight (default False)
-    italic         : bool  — italic style (default False)
-    layer          : str   — optional layer full path
-    name           : str   — optional object name
+    text           : str   -- text content (required)
+    x, y, z        : float -- insertion point (default 0)
+    height         : float -- text height in model units (default 1)
+    font           : str   -- font face name (default "Arial")
+    bold           : bool  -- bold weight (default False)
+    italic         : bool  -- italic style (default False)
+    layer          : str   -- optional layer full path
+    name           : str   -- optional object name
 
     Returns
     -------
@@ -1902,7 +1906,7 @@ def geometry_create_mesh(params):
 
     mesh.Compact()
     if not mesh.IsValid:
-        raise RuntimeError("Constructed Mesh is not valid — check faces and vertices.")
+        raise RuntimeError("Constructed Mesh is not valid -- check faces and vertices.")
 
     name, layer_idx = _g_attrs(params)
     obj_id = sc.doc.Objects.AddMesh(mesh)
@@ -2155,7 +2159,7 @@ def geometry_create_dimension(params):
 
     if obj_id == System.Guid.Empty:
         raise RuntimeError(
-            "Dimension creation failed for type '{t}' — check input points.".format(t=dim_type)
+            "Dimension creation failed for type '{t}' -- check input points.".format(t=dim_type)
         )
 
     _set_object_attributes(obj_id, name, layer_idx)
@@ -2214,7 +2218,7 @@ def geometry_create_hatch(params):
 
     if hatches is None or len(hatches) == 0:
         raise RuntimeError(
-            "Hatch.Create returned no hatches — verify that boundary curves are "
+            "Hatch.Create returned no hatches -- verify that boundary curves are "
             "closed and planar, and that pattern '{p}' exists.".format(p=pattern_name)
         )
 

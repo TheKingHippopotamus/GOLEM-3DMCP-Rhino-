@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 GOLEM-3DMCP Handler Registration
 
@@ -5,22 +6,22 @@ Import this module to register all handlers with the dispatcher.
 
 Call ``register_all_handlers()`` once during server startup (e.g. from
 ``startup.py`` or ``server.start_server()``) before the first client
-connection is accepted.  It is safe to call multiple times — the dispatcher
+connection is accepted.  It is safe to call multiple times -- the dispatcher
 simply overwrites any previously registered handler with the same name,
 which is idempotent in practice because the same function objects are
 re-registered.
 
 Handler modules
 ---------------
-scene        — Document info, layer management, object queries
-creation     — Primitive geometry creation (box, sphere, cylinder, …)
-operations   — Boolean ops, mirroring, grouping, curve ops
-surfaces     — Extrude, loft, revolve, sweep, patch, …
-manipulation — Move, rotate, scale, copy, orient, align, …
-grasshopper  — Grasshopper definition control and baking
-viewport     — Viewport capture, camera, display mode, named views
-files        — Open, save, import, export
-scripting    — Execute Python / RhinoScript, run Rhino commands
+scene        -- Document info, layer management, object queries
+creation     -- Primitive geometry creation (box, sphere, cylinder, …)
+operations   -- Boolean ops, mirroring, grouping, curve ops
+surfaces     -- Extrude, loft, revolve, sweep, patch, …
+manipulation -- Move, rotate, scale, copy, orient, align, …
+grasshopper  -- Grasshopper definition control and baking
+viewport     -- Viewport capture, camera, display mode, named views
+files        -- Open, save, import, export
+scripting    -- Execute Python / RhinoScript, run Rhino commands
 """
 
 from rhino_plugin.dispatcher import register_handlers_from_module, get_registered_methods

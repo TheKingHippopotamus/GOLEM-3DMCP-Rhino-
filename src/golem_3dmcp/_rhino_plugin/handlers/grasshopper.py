@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/grasshopper.py
 =====================================
@@ -21,9 +22,9 @@ Supported methods
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax,
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax,
   no lowercase ``dict[...]`` / ``list[...]`` runtime annotations.
-* Zero external dependencies — only Python stdlib plus Rhino/Grasshopper APIs.
+* Zero external dependencies -- only Python stdlib plus Rhino/Grasshopper APIs.
 * All Grasshopper API access is guarded by try/except; if GH is not loaded a
   clear error message is returned rather than raising.
 * Handler functions accept a single ``params`` dict (the dispatcher contract).
@@ -37,14 +38,19 @@ False and every handler returns an informative error immediately.
 Author: GOLEM-3DMCP
 """
 
+import traceback
+try:
+    from typing import Any, Dict, List, Optional
+except ImportError:
+    pass
 
 from rhino_plugin.dispatcher import handler
 from rhino_plugin.grasshopper.gh_handlers import (
-    bake_component_output,
-    get_param_value,
     serialize_gh_component,
     serialize_gh_param,
+    get_param_value,
     set_param_value,
+    bake_component_output,
 )
 
 # ---------------------------------------------------------------------------
@@ -55,11 +61,14 @@ _GH_AVAILABLE = False
 _GH_IMPORT_ERROR = ""
 
 try:
-    import clr  # type: ignore
+    import clr                                              # type: ignore
     clr.AddReference("Grasshopper")
-    import Grasshopper  # type: ignore
-    import rhinoscriptsyntax as rs  # type: ignore
-    import scriptcontext as sc  # type: ignore
+    import Grasshopper                                      # type: ignore
+    from Grasshopper.Kernel import GH_Document             # type: ignore
+    from Grasshopper.Kernel.Special import GH_NumberSlider  # type: ignore
+    import rhinoscriptsyntax as rs                         # type: ignore
+    import scriptcontext as sc                             # type: ignore
+    import Rhino                                           # type: ignore
     _GH_AVAILABLE = True
 except Exception as _exc:
     _GH_IMPORT_ERROR = str(_exc)
@@ -98,7 +107,7 @@ def _ensure_gh_available():
         raise RuntimeError(
             "Grasshopper assemblies are not available in this environment. "
             "This handler must run inside Rhino 3D. "
-            f"Import error: {_GH_IMPORT_ERROR}"
+            "Import error: {err}".format(err=_GH_IMPORT_ERROR)
         )
 
 
@@ -115,7 +124,9 @@ def _find_component(gh_doc, nickname=None, guid=None):
         if nickname is not None and hasattr(obj, "NickName") and obj.NickName == nickname:
             return obj
     raise ValueError(
-        f"Component not found in active definition: {nickname if nickname is not None else guid}"
+        "Component not found in active definition: {ident}".format(
+            ident=nickname if nickname is not None else guid
+        )
     )
 
 
@@ -174,7 +185,7 @@ def gh_open_definition(params):
         ok = doc_io.Open(file_path)
         if not ok:
             raise RuntimeError(
-                f"GH_DocumentIO.Open() returned False for path: {file_path}"
+                "GH_DocumentIO.Open() returned False for path: {p}".format(p=file_path)
             )
         new_doc = doc_io.Document
         if new_doc is None:
@@ -184,7 +195,9 @@ def gh_open_definition(params):
         component_count = new_doc.ObjectCount
     except Exception as exc:
         raise RuntimeError(
-            f"Failed to open Grasshopper definition '{file_path}': {exc}"
+            "Failed to open Grasshopper definition '{p}': {err}".format(
+                p=file_path, err=exc
+            )
         )
 
     return {
@@ -223,7 +236,7 @@ def gh_close_definition(params):
         if canvas is not None:
             canvas.Document = None
     except Exception as exc:
-        raise RuntimeError(f"Failed to close Grasshopper definition: {exc}")
+        raise RuntimeError("Failed to close Grasshopper definition: {err}".format(err=exc))
 
     return {"status": "closed"}
 
@@ -286,8 +299,7 @@ def gh_get_param(params):
     Returns
     -------
     dict
-        For sliders:  ``{"type": "slider", "value": <float>,
-        "min": <float>, "max": <float>, "slider_type": <str>}``
+        For sliders:  ``{"type": "slider", "value": <float>, "min": <float>, "max": <float>, "slider_type": <str>}``
         For panels:   ``{"type": "panel", "value": <str>}``
         For toggles:  ``{"type": "toggle", "value": <bool>}``
         For numbers:  ``{"type": "number", "value": <float>}``
@@ -390,7 +402,7 @@ def gh_recompute(params):
         gh_doc.NewSolution(True)
         solution_state = str(gh_doc.SolutionState)
     except Exception as exc:
-        raise RuntimeError(f"Recompute failed: {exc}")
+        raise RuntimeError("Recompute failed: {err}".format(err=exc))
 
     return {"status": "ok", "solution_state": solution_state}
 
@@ -496,7 +508,7 @@ def gh_run_definition(params):
             component = _find_component(gh_doc, nickname=component_name)
             set_param_value(component, None, value)
             component.ExpireSolution(True)
-        except Exception:
+        except Exception as exc:
             # Non-fatal: log and continue so other inputs are still applied.
             pass
 
@@ -504,7 +516,7 @@ def gh_run_definition(params):
     try:
         gh_doc.NewSolution(True)
     except Exception as exc:
-        raise RuntimeError(f"Solution failed during run_definition: {exc}")
+        raise RuntimeError("Solution failed during run_definition: {err}".format(err=exc))
 
     # Collect outputs.
     outputs = {}  # type: Dict[str, Any]

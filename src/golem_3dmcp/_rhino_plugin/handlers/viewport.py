@@ -1,29 +1,30 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/viewport.py
 ===================================
 Viewport & Visualization handlers for GOLEM-3DMCP.
 
-Runs INSIDE Rhino 3D with Python 3.9.  Zero external dependencies — only the
+Runs INSIDE Rhino 3D with Python 3.9.  Zero external dependencies -- only the
 Python stdlib plus the Rhino host environment (Rhino, rhinoscriptsyntax,
 scriptcontext, System).
 
 Registered methods
 ------------------
-  viewport.capture          — Capture a viewport to base64 PNG
-  viewport.set_view         — Set a standard or named view
-  viewport.zoom_object      — Zoom to bounding box of specific objects
-  viewport.zoom_extents     — Zoom to extents of all objects (one or all views)
-  viewport.zoom_selected    — Zoom to currently selected objects
-  viewport.set_display_mode — Change viewport display mode
-  viewport.set_camera       — Set camera location, target, and lens length
-  viewport.create_named_view  — Save current camera as a named view
-  viewport.restore_named_view — Restore a previously saved named view
-  viewport.list_named_views   — Return all saved named view names
-  viewport.get_view_info      — Return camera and viewport metadata
+  viewport.capture          -- Capture a viewport to base64 PNG
+  viewport.set_view         -- Set a standard or named view
+  viewport.zoom_object      -- Zoom to bounding box of specific objects
+  viewport.zoom_extents     -- Zoom to extents of all objects (one or all views)
+  viewport.zoom_selected    -- Zoom to currently selected objects
+  viewport.set_display_mode -- Change viewport display mode
+  viewport.set_camera       -- Set camera location, target, and lens length
+  viewport.create_named_view  -- Save current camera as a named view
+  viewport.restore_named_view -- Restore a previously saved named view
+  viewport.list_named_views   -- Return all saved named view names
+  viewport.get_view_info      -- Return camera and viewport metadata
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax,
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax,
   no ``dict[str, ...]`` lowercase generics in runtime annotations.
 * Every handler receives a single ``params`` dict from the dispatcher and
   returns a JSON-serialisable dict.
@@ -33,14 +34,15 @@ Design notes
   and return an OPERATION_FAILED result dict (never raise).
 """
 
-import Rhino  # noqa: F401 (Rhino host)
-import rhinoscriptsyntax as rs
+import Rhino                                          # noqa: F401 (Rhino host)
 import scriptcontext as sc
+import rhinoscriptsyntax as rs
 import System
 import System.Drawing
 
 from rhino_plugin.dispatcher import handler
 from rhino_plugin.utils.screenshot import capture_viewport_to_base64
+
 
 # ---------------------------------------------------------------------------
 # Standard view name constants and helpers
@@ -80,7 +82,7 @@ def _resolve_view(view_name):
         if v.ActiveViewport.Name.lower() == name_lower:
             return v
 
-    raise ValueError(f"View not found: '{view_name}'")
+    raise ValueError("View not found: '{name}'".format(name=view_name))
 
 
 def _point3d(x, y, z):
@@ -110,10 +112,10 @@ def capture_viewport(params):
 
     Params
     ------
-    width        : int, optional  — pixel width  (default 1920)
-    height       : int, optional  — pixel height (default 1080)
-    display_mode : str, optional  — display mode for the capture
-    view_name    : str, optional  — viewport name; active view if omitted
+    width        : int, optional  -- pixel width  (default 1920)
+    height       : int, optional  -- pixel height (default 1080)
+    display_mode : str, optional  -- display mode for the capture
+    view_name    : str, optional  -- viewport name; active view if omitted
 
     Returns
     -------
@@ -126,9 +128,9 @@ def capture_viewport(params):
     view_name = params.get("view_name", None)
 
     if width < 1 or width > 16384:
-        raise ValueError(f"width must be between 1 and 16384, got {width}")
+        raise ValueError("width must be between 1 and 16384, got {w}".format(w=width))
     if height < 1 or height > 16384:
-        raise ValueError(f"height must be between 1 and 16384, got {height}")
+        raise ValueError("height must be between 1 and 16384, got {h}".format(h=height))
 
     result = capture_viewport_to_base64(
         view_name=view_name,
@@ -167,9 +169,9 @@ def set_view(params):
 
     Params
     ------
-    view_name   : str, optional — standard view name: Top, Bottom, Left, Right,
+    view_name   : str, optional -- standard view name: Top, Bottom, Left, Right,
                   Front, Back, Perspective, TwoPointPerspective
-    named_view  : str, optional — name of a saved named view to restore instead
+    named_view  : str, optional -- name of a saved named view to restore instead
 
     Exactly one of ``view_name`` or ``named_view`` should be supplied.
     If both are present, ``named_view`` takes precedence.
@@ -183,7 +185,7 @@ def set_view(params):
         if not result:
             return {
                 "success": False,
-                "error": f"RestoreNamedView failed for '{named_view}'.",
+                "error": "RestoreNamedView failed for '{name}'.".format(name=named_view),
                 "code": "OPERATION_FAILED",
             }
         sc.doc.Views.Redraw()
@@ -198,9 +200,9 @@ def set_view(params):
     key = str(view_name).lower()
     if key not in _STANDARD_VIEWS:
         raise ValueError(
-            f"view_name '{view_name}' is not a recognised standard view. "
+            "view_name '{v}' is not a recognised standard view. "
             "Choose from: Top, Bottom, Left, Right, Front, Back, "
-            "Perspective, TwoPointPerspective."
+            "Perspective, TwoPointPerspective.".format(v=view_name)
         )
 
     # rhinoscriptsyntax uses the view's ActiveViewport.Name as the first arg.
@@ -269,7 +271,7 @@ def zoom_object(params):
 
     Params
     ------
-    ids : list of str — GUIDs of objects to zoom to
+    ids : list of str -- GUIDs of objects to zoom to
     """
     ids = params.get("ids", None)
     if ids is None:
@@ -330,7 +332,7 @@ def zoom_extents(params):
 
     Params
     ------
-    view_name : str, optional — target viewport; zooms all views if omitted
+    view_name : str, optional -- target viewport; zooms all views if omitted
     """
     view_name = params.get("view_name", None)
 
@@ -359,7 +361,7 @@ def zoom_selected(params):
 
     Params
     ------
-    (no required params — operates on the current selection)
+    (no required params -- operates on the current selection)
     """
     rs.ZoomSelected()
     sc.doc.Views.Redraw()
@@ -384,9 +386,9 @@ def set_display_mode(params):
 
     Params
     ------
-    mode      : str           — Wireframe, Shaded, Rendered, Ghosted, XRay,
+    mode      : str           -- Wireframe, Shaded, Rendered, Ghosted, XRay,
                                 Technical, Artistic, Pen
-    view_name : str, optional — target viewport; active view if omitted
+    view_name : str, optional -- target viewport; active view if omitted
     """
     mode = params.get("mode", None)
     if mode is None:
@@ -397,8 +399,10 @@ def set_display_mode(params):
     mode_str = str(mode)
     if mode_str.lower() not in _VALID_DISPLAY_MODES:
         raise ValueError(
-            f"Unrecognised display mode '{mode_str}'. Valid modes: "
-            "Wireframe, Shaded, Rendered, Ghosted, XRay, Technical, Artistic, Pen."
+            "Unrecognised display mode '{m}'. Valid modes: "
+            "Wireframe, Shaded, Rendered, Ghosted, XRay, Technical, Artistic, Pen.".format(
+                m=mode_str
+            )
         )
 
     # Resolve the target view name string for rhinoscriptsyntax.
@@ -415,7 +419,7 @@ def set_display_mode(params):
     if result is None:
         return {
             "success": False,
-            "error": f"ViewDisplayMode returned None for mode '{mode_str}'.",
+            "error": "ViewDisplayMode returned None for mode '{m}'.".format(m=mode_str),
             "code": "OPERATION_FAILED",
         }
 
@@ -441,8 +445,8 @@ def set_camera(params):
     ------
     camera_location : list [x, y, z] or dict {x, y, z}
     target          : list [x, y, z] or dict {x, y, z}
-    lens_length     : float, optional — perspective lens length in mm (default 50)
-    view_name       : str,   optional — target viewport; active view if omitted
+    lens_length     : float, optional -- perspective lens length in mm (default 50)
+    view_name       : str,   optional -- target viewport; active view if omitted
     """
     camera_location = params.get("camera_location", None)
     target = params.get("target", None)
@@ -460,7 +464,7 @@ def set_camera(params):
         if isinstance(value, (list, tuple)):
             if len(value) != 3:
                 raise ValueError(
-                    f"'{name}' must have exactly 3 elements [x, y, z]."
+                    "'{n}' must have exactly 3 elements [x, y, z].".format(n=name)
                 )
             return (float(value[0]), float(value[1]), float(value[2]))
         if isinstance(value, dict):
@@ -468,10 +472,12 @@ def set_camera(params):
                 return (float(value["x"]), float(value["y"]), float(value["z"]))
             except KeyError as exc:
                 raise ValueError(
-                    f"'{name}' dict is missing key: {exc}"
+                    "'{n}' dict is missing key: {k}".format(n=name, k=exc)
                 )
         raise TypeError(
-            f"'{name}' must be a list [x,y,z] or dict {{x,y,z}}, got {type(value).__name__}."
+            "'{n}' must be a list [x,y,z] or dict {{x,y,z}}, got {t}.".format(
+                n=name, t=type(value).__name__
+            )
         )
 
     cam_x, cam_y, cam_z = _parse_point(camera_location, "camera_location")
@@ -480,7 +486,7 @@ def set_camera(params):
     if lens_length is not None:
         lens_length = float(lens_length)
         if lens_length <= 0:
-            raise ValueError(f"lens_length must be positive, got {lens_length}")
+            raise ValueError("lens_length must be positive, got {l}".format(l=lens_length))
 
     # Resolve view name string for rhinoscriptsyntax.
     if view_name is not None:
@@ -548,7 +554,7 @@ def _create_named_view_impl(params):
     if result is None:
         return {
             "success": False,
-            "error": f"AddNamedView failed for '{name}'.",
+            "error": "AddNamedView failed for '{name}'.".format(name=name),
             "code": "OPERATION_FAILED",
         }
 
@@ -567,8 +573,8 @@ def create_named_view(params):
 
     Params
     ------
-    name      : str           — name to save the view under
-    view_name : str, optional — viewport to save from; active view if omitted
+    name      : str           -- name to save the view under
+    view_name : str, optional -- viewport to save from; active view if omitted
     """
     return _create_named_view_impl(params)
 
@@ -595,8 +601,8 @@ def restore_named_view(params):
 
     Params
     ------
-    name      : str           — name of the saved view to restore
-    view_name : str, optional — viewport to restore into; active view if omitted
+    name      : str           -- name of the saved view to restore
+    view_name : str, optional -- viewport to restore into; active view if omitted
     """
     name = params.get("name", None)
     view_name = params.get("view_name", None)
@@ -617,8 +623,8 @@ def restore_named_view(params):
     if not result:
         return {
             "success": False,
-            "error": f"RestoreNamedView failed for '{name}'. "
-                     "Check that the named view exists.",
+            "error": "RestoreNamedView failed for '{name}'. "
+                     "Check that the named view exists.".format(name=name),
             "code": "OPERATION_FAILED",
         }
 
@@ -668,7 +674,7 @@ def get_view_info(params):
 
     Params
     ------
-    view_name : str, optional — target viewport; active view if omitted
+    view_name : str, optional -- target viewport; active view if omitted
 
     Returns
     -------
@@ -747,7 +753,7 @@ def set_background_color(params):
 
     Params
     ------
-    color : list [r, g, b] or dict {r, g, b} — RGB channels 0-255
+    color : list [r, g, b] or dict {r, g, b} -- RGB channels 0-255
     """
     color = params.get("color", None)
     if color is None:
@@ -762,17 +768,19 @@ def set_background_color(params):
         try:
             r, g, b = int(color["r"]), int(color["g"]), int(color["b"])
         except KeyError as exc:
-            raise ValueError(f"'color' dict is missing key: {exc}")
+            raise ValueError("'color' dict is missing key: {k}".format(k=exc))
     else:
         raise TypeError(
-            "'color' must be a list [r,g,b] or dict {r,g,b}, "
-            f"got {type(color).__name__}."
+            "'color' must be a list [r,g,b] or dict {{r,g,b}}, "
+            "got {t}.".format(t=type(color).__name__)
         )
 
     for channel, val in (("r", r), ("g", g), ("b", b)):
         if not 0 <= val <= 255:
             raise ValueError(
-                f"Color channel '{channel}' must be between 0 and 255, got {val}."
+                "Color channel '{c}' must be between 0 and 255, got {v}.".format(
+                    c=channel, v=val
+                )
             )
 
     new_color = System.Drawing.Color.FromArgb(r, g, b)

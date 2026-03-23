@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/protocol.py
 ========================
@@ -9,7 +10,7 @@ Wire format:
 This module runs INSIDE Rhino 3D with Python 3.9. It must:
   - Use ONLY Python stdlib (no third-party packages).
   - Be compatible with Python 3.9 (no match/case, no X|Y union syntax).
-  - Handle TCP fragmentation correctly — a single send() can arrive as
+  - Handle TCP fragmentation correctly -- a single send() can arrive as
     multiple recv() calls, so every read loops until the exact byte count
     is satisfied.
 
@@ -19,7 +20,10 @@ Author: GOLEM-3DMCP
 import json
 import socket
 import struct
-from typing import Dict, Any, Optional
+try:
+    from typing import Dict, Any, Optional
+except ImportError:
+    pass
 
 # Header is a single big-endian unsigned 32-bit integer (4 bytes).
 _HEADER_FORMAT = "!I"
@@ -35,7 +39,7 @@ def _recv_exactly(sock, num_bytes):
     """
     Read exactly *num_bytes* from *sock*, blocking until all bytes arrive.
 
-    TCP is a stream protocol — recv() may return fewer bytes than requested
+    TCP is a stream protocol -- recv() may return fewer bytes than requested
     if the kernel buffer is not yet full, or if the sender transmitted the
     data in multiple segments.  This helper loops until the full count is
     satisfied or the connection is closed/broken.

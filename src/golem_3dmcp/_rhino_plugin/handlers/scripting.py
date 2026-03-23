@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/scripting.py
 =====================================
@@ -11,8 +12,8 @@ Registered methods (dispatched via rhino_plugin.dispatcher):
 
 Design notes
 ------------
-* Python 3.9 compatible — no match/case, no X | Y union syntax.
-* Zero external dependencies — only Python stdlib, RhinoCommon,
+* Python 3.9 compatible -- no match/case, no X | Y union syntax.
+* Zero external dependencies -- only Python stdlib, RhinoCommon,
   rhinoscriptsyntax, and System (all available inside Rhino's runtime).
 * ``execute_python`` is an UNRESTRICTED execution environment.  It is
   intended as an escape hatch for operations not yet covered by dedicated
@@ -23,21 +24,25 @@ Design notes
   from otherwise imperative scripts.
 * Output capture uses ``io.StringIO`` + ``contextlib.redirect_stdout /
   redirect_stderr``; this captures ``print()`` calls from the guest code.
-  Native Rhino output (RhinoApp.WriteLine) is NOT captured — it goes to
+  Native Rhino output (RhinoApp.WriteLine) is NOT captured -- it goes to
   the Rhino command history window instead.
 """
 
-import contextlib
 import io
+import contextlib
+try:
+    from typing import Any, Optional
+except ImportError:
+    pass
 
 # These imports are only available inside the Rhino Python environment.
 # The try/except lets linters and unit-test runners import the module without
 # exploding; at runtime inside Rhino they will always succeed.
 try:
-    import Rhino  # type: ignore
-    import rhinoscriptsyntax as rs  # type: ignore
-    import scriptcontext as sc  # type: ignore
-    import System  # type: ignore
+    import Rhino                              # type: ignore
+    import scriptcontext as sc                # type: ignore
+    import rhinoscriptsyntax as rs            # type: ignore
+    import System                             # type: ignore
     _RHINO_AVAILABLE = True
 except ImportError:
     _RHINO_AVAILABLE = False
@@ -49,6 +54,7 @@ except ImportError:
 
 from rhino_plugin.dispatcher import handler  # noqa: E402
 from rhino_plugin.utils.geometry_serializer import serialize_any  # noqa: E402
+
 
 # ---------------------------------------------------------------------------
 # Serialisation helper
@@ -97,7 +103,7 @@ def try_serialize(obj):
         except Exception:
             pass
 
-    # Final fallback — stringify whatever we got.
+    # Final fallback -- stringify whatever we got.
     try:
         return str(obj)
     except Exception:
@@ -141,10 +147,10 @@ def handle_execute_python(params):
     Execute arbitrary Python code inside Rhino's Python 3.9 runtime.
 
     The code has full access to:
-    - ``rs``     — rhinoscriptsyntax
-    - ``sc``     — scriptcontext (sc.doc is the active document)
-    - ``Rhino``  — RhinoCommon API
-    - ``System`` — .NET System namespace
+    - ``rs``     -- rhinoscriptsyntax
+    - ``sc``     -- scriptcontext (sc.doc is the active document)
+    - ``Rhino``  -- RhinoCommon API
+    - ``System`` -- .NET System namespace
     - All Python builtins
 
     The special variable ``__result__`` can be set inside the code to
@@ -158,10 +164,10 @@ def handle_execute_python(params):
     Parameters
     ----------
     params : dict
-        ``code``    (str, required)           — Python source code to run.
-        ``context`` (dict, optional)          — Extra variables to inject into
+        ``code``    (str, required)           -- Python source code to run.
+        ``context`` (dict, optional)          -- Extra variables to inject into
                                                 the execution namespace.
-        ``timeout`` (int, optional, default 30) — Ignored in this
+        ``timeout`` (int, optional, default 30) -- Ignored in this
                                                 synchronous implementation
                                                 (present for API compatibility
                                                 with the MCP tool signature).
@@ -169,10 +175,10 @@ def handle_execute_python(params):
     Returns
     -------
     dict
-        ``success`` — True if no exception was raised.
-        ``stdout``  — Captured print() output.
-        ``stderr``  — Exception message (if success=False), else "".
-        ``result``  — Serialised value of ``__result__``, or None.
+        ``success`` -- True if no exception was raised.
+        ``stdout``  -- Captured print() output.
+        ``stderr``  -- Exception message (if success=False), else "".
+        ``result``  -- Serialised value of ``__result__``, or None.
     """
     code = params.get("code", "")
     if not code or not code.strip():
@@ -187,7 +193,7 @@ def handle_execute_python(params):
     try:
         with contextlib.redirect_stdout(stdout_capture), \
              contextlib.redirect_stderr(stderr_capture):
-            exec(code, namespace)  # noqa: S102 — intentional escape hatch
+            exec(code, namespace)  # noqa: S102 -- intentional escape hatch
     except Exception as exc:
         return {
             "success": False,
@@ -220,18 +226,18 @@ def handle_execute_rhinocommand(params):
     Parameters
     ----------
     params : dict
-        ``command`` (str, required) — The Rhino command string.  Can include
+        ``command`` (str, required) -- The Rhino command string.  Can include
             options separated by spaces or newlines.
             Example: ``"_Line 0,0,0 10,10,0"``
-        ``echo``    (bool, optional, default False) — Echo the command to the
+        ``echo``    (bool, optional, default False) -- Echo the command to the
             Rhino command history window.
 
     Returns
     -------
     dict
-        ``success``        — True if rs.Command() returned without raising.
-        ``command``        — The command string that was executed.
-        ``command_result`` — The integer return code from rs.Command(), or
+        ``success``        -- True if rs.Command() returned without raising.
+        ``command``        -- The command string that was executed.
+        ``command_result`` -- The integer return code from rs.Command(), or
                              None if it could not be retrieved.
 
     Example
@@ -272,7 +278,7 @@ def handle_evaluate_expression(params):
     Evaluate a single Python expression and return its value.
 
     Uses ``eval()`` rather than ``exec()``, so only expressions are
-    accepted — not statements.  This is useful for quick property
+    accepted -- not statements.  This is useful for quick property
     queries and calculations without needing a full ``execute_python``
     call.
 
@@ -282,19 +288,19 @@ def handle_evaluate_expression(params):
     Parameters
     ----------
     params : dict
-        ``expression`` (str, required)  — A single Python expression.
+        ``expression`` (str, required)  -- A single Python expression.
             Example: ``"rs.ObjectLayer('guid-here')"``
-        ``variables``  (dict, optional) — Extra variables available during
+        ``variables``  (dict, optional) -- Extra variables available during
             evaluation.
             Example: ``{"x": 3.0, "y": 4.0}``
 
     Returns
     -------
     dict
-        ``success``    — True if no exception was raised.
-        ``value``      — Serialised result of the expression, or None.
-        ``type``       — Python type name of the raw result (e.g. "str").
-        ``error``      — Exception message if success=False, else None.
+        ``success``    -- True if no exception was raised.
+        ``value``      -- Serialised result of the expression, or None.
+        ``type``       -- Python type name of the raw result (e.g. "str").
+        ``error``      -- Exception message if success=False, else None.
 
     Example
     -------
@@ -310,7 +316,7 @@ def handle_evaluate_expression(params):
     namespace = _build_namespace(extra=variables)
 
     try:
-        raw = eval(expression, namespace)  # noqa: S307 — intentional escape hatch
+        raw = eval(expression, namespace)  # noqa: S307 -- intentional escape hatch
     except Exception as exc:
         return {
             "success": False,
@@ -343,17 +349,17 @@ def handle_run_rhino_script(params):
     Parameters
     ----------
     params : dict
-        ``file_path`` (str, required) — Absolute path to a ``.py`` script
+        ``file_path`` (str, required) -- Absolute path to a ``.py`` script
             file on the local filesystem.
 
     Returns
     -------
     dict
-        ``success``    — True if no exception was raised.
-        ``file_path``  — The path of the script that was run.
-        ``stdout``     — Captured print() output from the script.
-        ``stderr``     — Exception message (if success=False), else "".
-        ``result``     — Serialised value of ``__result__``, or None.
+        ``success``    -- True if no exception was raised.
+        ``file_path``  -- The path of the script that was run.
+        ``stdout``     -- Captured print() output from the script.
+        ``stderr``     -- Exception message (if success=False), else "".
+        ``result``     -- Serialised value of ``__result__``, or None.
 
     Notes
     -----
@@ -368,20 +374,22 @@ def handle_run_rhino_script(params):
 
     if not os.path.isfile(file_path):
         raise ValueError(
-            f"Script file not found: {file_path}"
+            "Script file not found: {path}".format(path=file_path)
         )
 
     try:
-        with open(file_path, encoding="utf-8") as fh:
+        with open(file_path, "r", encoding="utf-8") as fh:
             code = fh.read()
     except Exception as exc:
         raise ValueError(
-            f"Could not read script file {file_path}: {exc}"
+            "Could not read script file {path}: {exc}".format(
+                path=file_path, exc=exc
+            )
         )
 
     if not code.strip():
         raise ValueError(
-            f"Script file is empty: {file_path}"
+            "Script file is empty: {path}".format(path=file_path)
         )
 
     namespace = _build_namespace()
@@ -391,7 +399,7 @@ def handle_run_rhino_script(params):
     try:
         with contextlib.redirect_stdout(stdout_capture), \
              contextlib.redirect_stderr(stderr_capture):
-            exec(code, namespace)  # noqa: S102 — intentional escape hatch
+            exec(code, namespace)  # noqa: S102 -- intentional escape hatch
     except Exception as exc:
         return {
             "success": False,

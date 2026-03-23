@@ -1,29 +1,30 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/viewport.py
 ===================================
 Viewport & Visualization handlers for GOLEM-3DMCP.
 
-Runs INSIDE Rhino 3D with Python 3.9.  Zero external dependencies — only the
+Runs INSIDE Rhino 3D with Python 3.9.  Zero external dependencies -- only the
 Python stdlib plus the Rhino host environment (Rhino, rhinoscriptsyntax,
 scriptcontext, System).
 
 Registered methods
 ------------------
-  viewport.capture          — Capture a viewport to base64 PNG
-  viewport.set_view         — Set a standard or named view
-  viewport.zoom_object      — Zoom to bounding box of specific objects
-  viewport.zoom_extents     — Zoom to extents of all objects (one or all views)
-  viewport.zoom_selected    — Zoom to currently selected objects
-  viewport.set_display_mode — Change viewport display mode
-  viewport.set_camera       — Set camera location, target, and lens length
-  viewport.create_named_view  — Save current camera as a named view
-  viewport.restore_named_view — Restore a previously saved named view
-  viewport.list_named_views   — Return all saved named view names
-  viewport.get_view_info      — Return camera and viewport metadata
+  viewport.capture          -- Capture a viewport to base64 PNG
+  viewport.set_view         -- Set a standard or named view
+  viewport.zoom_object      -- Zoom to bounding box of specific objects
+  viewport.zoom_extents     -- Zoom to extents of all objects (one or all views)
+  viewport.zoom_selected    -- Zoom to currently selected objects
+  viewport.set_display_mode -- Change viewport display mode
+  viewport.set_camera       -- Set camera location, target, and lens length
+  viewport.create_named_view  -- Save current camera as a named view
+  viewport.restore_named_view -- Restore a previously saved named view
+  viewport.list_named_views   -- Return all saved named view names
+  viewport.get_view_info      -- Return camera and viewport metadata
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax,
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax,
   no ``dict[str, ...]`` lowercase generics in runtime annotations.
 * Every handler receives a single ``params`` dict from the dispatcher and
   returns a JSON-serialisable dict.
@@ -111,10 +112,10 @@ def capture_viewport(params):
 
     Params
     ------
-    width        : int, optional  — pixel width  (default 1920)
-    height       : int, optional  — pixel height (default 1080)
-    display_mode : str, optional  — display mode for the capture
-    view_name    : str, optional  — viewport name; active view if omitted
+    width        : int, optional  -- pixel width  (default 1920)
+    height       : int, optional  -- pixel height (default 1080)
+    display_mode : str, optional  -- display mode for the capture
+    view_name    : str, optional  -- viewport name; active view if omitted
 
     Returns
     -------
@@ -168,9 +169,9 @@ def set_view(params):
 
     Params
     ------
-    view_name   : str, optional — standard view name: Top, Bottom, Left, Right,
+    view_name   : str, optional -- standard view name: Top, Bottom, Left, Right,
                   Front, Back, Perspective, TwoPointPerspective
-    named_view  : str, optional — name of a saved named view to restore instead
+    named_view  : str, optional -- name of a saved named view to restore instead
 
     Exactly one of ``view_name`` or ``named_view`` should be supplied.
     If both are present, ``named_view`` takes precedence.
@@ -270,7 +271,7 @@ def zoom_object(params):
 
     Params
     ------
-    ids : list of str — GUIDs of objects to zoom to
+    ids : list of str -- GUIDs of objects to zoom to
     """
     ids = params.get("ids", None)
     if ids is None:
@@ -331,7 +332,7 @@ def zoom_extents(params):
 
     Params
     ------
-    view_name : str, optional — target viewport; zooms all views if omitted
+    view_name : str, optional -- target viewport; zooms all views if omitted
     """
     view_name = params.get("view_name", None)
 
@@ -360,7 +361,7 @@ def zoom_selected(params):
 
     Params
     ------
-    (no required params — operates on the current selection)
+    (no required params -- operates on the current selection)
     """
     rs.ZoomSelected()
     sc.doc.Views.Redraw()
@@ -385,9 +386,9 @@ def set_display_mode(params):
 
     Params
     ------
-    mode      : str           — Wireframe, Shaded, Rendered, Ghosted, XRay,
+    mode      : str           -- Wireframe, Shaded, Rendered, Ghosted, XRay,
                                 Technical, Artistic, Pen
-    view_name : str, optional — target viewport; active view if omitted
+    view_name : str, optional -- target viewport; active view if omitted
     """
     mode = params.get("mode", None)
     if mode is None:
@@ -444,8 +445,8 @@ def set_camera(params):
     ------
     camera_location : list [x, y, z] or dict {x, y, z}
     target          : list [x, y, z] or dict {x, y, z}
-    lens_length     : float, optional — perspective lens length in mm (default 50)
-    view_name       : str,   optional — target viewport; active view if omitted
+    lens_length     : float, optional -- perspective lens length in mm (default 50)
+    view_name       : str,   optional -- target viewport; active view if omitted
     """
     camera_location = params.get("camera_location", None)
     target = params.get("target", None)
@@ -572,8 +573,8 @@ def create_named_view(params):
 
     Params
     ------
-    name      : str           — name to save the view under
-    view_name : str, optional — viewport to save from; active view if omitted
+    name      : str           -- name to save the view under
+    view_name : str, optional -- viewport to save from; active view if omitted
     """
     return _create_named_view_impl(params)
 
@@ -600,8 +601,8 @@ def restore_named_view(params):
 
     Params
     ------
-    name      : str           — name of the saved view to restore
-    view_name : str, optional — viewport to restore into; active view if omitted
+    name      : str           -- name of the saved view to restore
+    view_name : str, optional -- viewport to restore into; active view if omitted
     """
     name = params.get("name", None)
     view_name = params.get("view_name", None)
@@ -673,7 +674,7 @@ def get_view_info(params):
 
     Params
     ------
-    view_name : str, optional — target viewport; active view if omitted
+    view_name : str, optional -- target viewport; active view if omitted
 
     Returns
     -------
@@ -752,7 +753,7 @@ def set_background_color(params):
 
     Params
     ------
-    color : list [r, g, b] or dict {r, g, b} — RGB channels 0-255
+    color : list [r, g, b] or dict {r, g, b} -- RGB channels 0-255
     """
     color = params.get("color", None)
     if color is None:

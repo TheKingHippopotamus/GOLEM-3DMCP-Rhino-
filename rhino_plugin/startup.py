@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/startup.py
 =======================
@@ -36,7 +37,7 @@ _PORT = 9876
 project_root = "/Users/kinghippo/Documents/GOLEM-3DMCP"
 
 # ---------------------------------------------------------------------------
-# Path setup — must happen before any rhino_plugin imports
+# Path setup -- must happen before any rhino_plugin imports
 # ---------------------------------------------------------------------------
 
 if project_root not in sys.path:
@@ -52,7 +53,7 @@ try:
     from rhino_plugin.dispatcher import get_registered_methods               # noqa: E402
 except Exception as _import_exc:
     print(
-        "GOLEM-3DMCP: ERROR — Failed to import server modules.\n"
+        "GOLEM-3DMCP: ERROR -- Failed to import server modules.\n"
         "  Ensure '{root}' is the correct project root and all\n"
         "  required packages are present.\n"
         "  Detail: {exc}".format(root=project_root, exc=_import_exc)
@@ -80,7 +81,7 @@ def stop_golem():
         stop_server()
         print("GOLEM-3DMCP: Server stopped.")
     except Exception as exc:
-        print("GOLEM-3DMCP: ERROR while stopping server — {exc}".format(exc=exc))
+        print("GOLEM-3DMCP: ERROR while stopping server -- {exc}".format(exc=exc))
 
 
 def restart_golem(host=_HOST, port=_PORT):
@@ -119,7 +120,7 @@ def _start(host, port):
         start_server(host, port)
     except OSError as exc:
         print(
-            "GOLEM-3DMCP: ERROR — Could not bind {host}:{port}.\n"
+            "GOLEM-3DMCP: ERROR -- Could not bind {host}:{port}.\n"
             "  The port may already be in use by another process.\n"
             "  Detail: {exc}\n"
             "  Try: restart_golem() or change _PORT at the top of startup.py.".format(
@@ -129,7 +130,7 @@ def _start(host, port):
         return
     except Exception as exc:
         print(
-            "GOLEM-3DMCP: ERROR — Unexpected failure starting server: {exc}".format(
+            "GOLEM-3DMCP: ERROR -- Unexpected failure starting server: {exc}".format(
                 exc=exc
             )
         )

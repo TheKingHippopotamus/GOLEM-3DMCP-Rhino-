@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/utils/screenshot.py
 ==================================
@@ -5,7 +6,7 @@ Capture a Rhino viewport to a base64-encoded PNG string.
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax.
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax.
 * Zero external dependencies beyond what Rhino ships (System.Drawing,
   System.IO, the built-in ``base64`` module).
 * Runs **inside Rhino 3D** where ``Rhino``, ``System``, and
@@ -19,7 +20,10 @@ Display mode names accepted (case-insensitive) examples:
 """
 
 import base64
-from typing import Dict, Optional
+try:
+    from typing import Dict, Optional
+except ImportError:
+    pass
 
 try:
     import Rhino
@@ -81,7 +85,7 @@ def capture_viewport_to_base64(
 
     Raises
     ------
-    Does not raise — all exceptions are caught and returned as error dicts.
+    Does not raise -- all exceptions are caught and returned as error dicts.
     """
     if not _RHINO_AVAILABLE:
         return {

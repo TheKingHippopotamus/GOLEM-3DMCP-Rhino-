@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/server.py
 ======================
@@ -24,23 +25,28 @@ Python 3.9 compatibility:
 Author: GOLEM-3DMCP
 """
 
+import json
 import socket
 import threading
 import traceback
+try:
+    from typing import Optional, Callable, Any
+except ImportError:
+    pass
 
 # Rhino-specific imports.  These are available inside Rhino's IronPython /
 # Python 3.9 runtime.  The TYPE_CHECKING guard allows IDEs to resolve the
 # symbols without a local Rhino installation.
 try:
-    import Rhino  # type: ignore
-    import System  # type: ignore
+    import Rhino                       # type: ignore
+    import System                      # type: ignore
     _RHINO_AVAILABLE = True
 except ImportError:
     # Running outside Rhino (e.g., unit tests).  Provide thin stubs so the
     # rest of the module can be imported and tested.
     _RHINO_AVAILABLE = False
 
-from rhino_plugin.protocol import recv_message, send_message
+from rhino_plugin.protocol import send_message, recv_message
 
 # ---------------------------------------------------------------------------
 # Module-level state
@@ -189,14 +195,14 @@ def handle_client(conn, addr):
             "params": <dict>       // Method parameters (may be empty dict)
         }
 
-    Message protocol (response — success):
+    Message protocol (response -- success):
         {
             "id":     <str|int>,
             "result": <dict>,
             "error":  null
         }
 
-    Message protocol (response — error):
+    Message protocol (response -- error):
         {
             "id":     <str|int|null>,
             "result": null,
@@ -207,7 +213,7 @@ def handle_client(conn, addr):
         conn: The accepted client socket.
         addr: The (host, port) tuple of the remote client.
     """
-    _log(f"Client connected: {addr}")
+    _log("Client connected: {addr}".format(addr=addr))
     conn.settimeout(None)  # Blocking mode; client reads block indefinitely.
 
     try:
@@ -218,13 +224,15 @@ def handle_client(conn, addr):
             try:
                 request = recv_message(conn)
             except ConnectionError:
-                _log(f"Client {addr} disconnected (clean EOF).")
+                _log("Client {addr} disconnected (clean EOF).".format(addr=addr))
                 break
             except OSError as exc:
-                _log(f"Client {addr} socket error while reading: {exc}")
+                _log("Client {addr} socket error while reading: {exc}".format(
+                    addr=addr, exc=exc))
                 break
             except Exception as exc:
-                _log(f"Client {addr} unexpected read error: {exc}")
+                _log("Client {addr} unexpected read error: {exc}".format(
+                    addr=addr, exc=exc))
                 break
 
             # ------------------------------------------------------------------
@@ -244,13 +252,18 @@ def handle_client(conn, addr):
                 response = _dispatch(method, params, request_id)
             except Exception as exc:
                 _log(
-                    f"Unhandled exception dispatching '{method}' "
-                    f"for {addr}: {exc}\n{traceback.format_exc()}"
+                    "Unhandled exception dispatching '{method}' "
+                    "for {addr}: {exc}\n{tb}".format(
+                        method=method,
+                        addr=addr,
+                        exc=exc,
+                        tb=traceback.format_exc(),
+                    )
                 )
                 response = _error_response(
                     request_id,
                     code=-32603,
-                    message=f"Internal error: {exc}",
+                    message="Internal error: {exc}".format(exc=exc),
                 )
 
             # ------------------------------------------------------------------
@@ -259,7 +272,8 @@ def handle_client(conn, addr):
             try:
                 send_message(conn, response)
             except OSError as exc:
-                _log(f"Client {addr} socket error while writing: {exc}")
+                _log("Client {addr} socket error while writing: {exc}".format(
+                    addr=addr, exc=exc))
                 break
 
     finally:
@@ -267,7 +281,7 @@ def handle_client(conn, addr):
             conn.close()
         except OSError:
             pass
-        _log(f"Client {addr} session ended.")
+        _log("Client {addr} session ended.".format(addr=addr))
 
 
 def _dispatch(method, params, request_id):
@@ -286,7 +300,7 @@ def _dispatch(method, params, request_id):
         # registered Rhino-specific commands.
         try:
             from rhino_plugin import dispatcher as _dispatcher  # type: ignore
-            # The external dispatcher never raises — it returns its own full
+            # The external dispatcher never raises -- it returns its own full
             # response envelope ({"jsonrpc": "2.0", "id": ..., "result"|"error": ...}).
             # We run it on the UI thread and then normalise its output into our
             # wire envelope format.
@@ -310,7 +324,7 @@ def _dispatch(method, params, request_id):
             return _error_response(
                 request_id,
                 code=-32601,
-                message=f"Method not found: {method}",
+                message="Method not found: {method}".format(method=method),
             )
     else:
         registry_func = _method_registry[method]
@@ -360,7 +374,8 @@ def start_server(host="127.0.0.1", port=9876):
 
     with _running_lock:
         if _running:
-            _log(f"Server is already running on {host}:{port}. Ignoring start_server().")
+            _log("Server is already running on {host}:{port}. Ignoring start_server().".format(
+                host=host, port=port))
             return
 
         # Register built-in methods before accepting connections.
@@ -368,16 +383,18 @@ def start_server(host="127.0.0.1", port=9876):
 
         # Register all domain-specific handler modules (scene, creation,
         # operations, surfaces, manipulation, grasshopper, viewport, files,
-        # scripting).  This is idempotent — calling it multiple times is safe.
+        # scripting).  This is idempotent -- calling it multiple times is safe.
         try:
             from rhino_plugin.handlers import register_all_handlers
             handler_count = register_all_handlers()
-            _log(f"GOLEM-3DMCP: Registered {handler_count} handler methods.")
+            _log("GOLEM-3DMCP: Registered {n} handler methods.".format(n=handler_count))
         except Exception as _reg_exc:
             # Non-fatal: the server can still start and serve built-in methods.
             # Individual unregistered domain methods will return NOT_FOUND.
             _log(
-                f"GOLEM-3DMCP: WARNING — handler registration failed: {_reg_exc}"
+                "GOLEM-3DMCP: WARNING -- handler registration failed: {exc}".format(
+                    exc=_reg_exc
+                )
             )
 
         # Create the server socket with SO_REUSEADDR so Rhino can restart
@@ -388,7 +405,8 @@ def start_server(host="127.0.0.1", port=9876):
         try:
             srv.bind((host, port))
         except OSError as exc:
-            _log(f"GOLEM-3DMCP: Failed to bind {host}:{port} — {exc}")
+            _log("GOLEM-3DMCP: Failed to bind {host}:{port} -- {exc}".format(
+                host=host, port=port, exc=exc))
             srv.close()
             raise
 
@@ -396,7 +414,7 @@ def start_server(host="127.0.0.1", port=9876):
         _server_socket = srv
         _running = True
 
-    _log(f"GOLEM-3DMCP: Server listening on {host}:{port}")
+    _log("GOLEM-3DMCP: Server listening on {host}:{port}".format(host=host, port=port))
 
     # Accept loop runs in a background thread.
     _server_thread = threading.Thread(
@@ -425,7 +443,7 @@ def _accept_loop(srv):
         srv.settimeout(1.0)
         try:
             conn, addr = srv.accept()
-        except TimeoutError:
+        except socket.timeout:
             continue  # No new client; loop back and check _running.
         except OSError:
             # Server socket was closed by stop_server().

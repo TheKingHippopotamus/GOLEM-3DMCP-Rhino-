@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/grasshopper.py
 =====================================
@@ -21,9 +22,9 @@ Supported methods
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax,
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax,
   no lowercase ``dict[...]`` / ``list[...]`` runtime annotations.
-* Zero external dependencies — only Python stdlib plus Rhino/Grasshopper APIs.
+* Zero external dependencies -- only Python stdlib plus Rhino/Grasshopper APIs.
 * All Grasshopper API access is guarded by try/except; if GH is not loaded a
   clear error message is returned rather than raising.
 * Handler functions accept a single ``params`` dict (the dispatcher contract).
@@ -38,7 +39,10 @@ Author: GOLEM-3DMCP
 """
 
 import traceback
-from typing import Any, Dict, List, Optional
+try:
+    from typing import Any, Dict, List, Optional
+except ImportError:
+    pass
 
 from rhino_plugin.dispatcher import handler
 from rhino_plugin.grasshopper.gh_handlers import (

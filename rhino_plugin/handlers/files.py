@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/files.py
 ================================
@@ -14,9 +15,9 @@ Registered methods (dispatched via rhino_plugin.dispatcher):
 
 Design notes
 ------------
-* Python 3.9 compatible — no match/case, no X | Y union syntax, no
+* Python 3.9 compatible -- no match/case, no X | Y union syntax, no
   lowercase-generic annotations at runtime (Dict/List from typing).
-* Zero external dependencies — only Python stdlib, RhinoCommon, and
+* Zero external dependencies -- only Python stdlib, RhinoCommon, and
   rhinoscriptsyntax (all available inside Rhino's runtime).
 * Every handler receives a plain dict (params) and returns a plain dict
   (result).  The dispatcher wraps the result in a JSON-RPC envelope.
@@ -43,7 +44,7 @@ from rhino_plugin.dispatcher import handler  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
-# Supported export extensions (informational — Rhino enforces the real list)
+# Supported export extensions (informational -- Rhino enforces the real list)
 # ---------------------------------------------------------------------------
 
 _SUPPORTED_EXPORT_EXTENSIONS = {
@@ -80,10 +81,10 @@ def handle_get_document_path(params):
     Returns
     -------
     dict
-        ``file_path``   — Absolute path string, or None if the document has
+        ``file_path``   -- Absolute path string, or None if the document has
                           never been saved.
-        ``file_name``   — Base filename (e.g. "model.3dm"), or None.
-        ``is_modified`` — True if there are unsaved changes.
+        ``file_name``   -- Base filename (e.g. "model.3dm"), or None.
+        ``is_modified`` -- True if there are unsaved changes.
     """
     result = {
         "file_path": None,
@@ -124,8 +125,8 @@ def handle_save_document(params):
     Returns
     -------
     dict
-        ``success``   — True on success.
-        ``file_path`` — The path the document was saved to.
+        ``success``   -- True on success.
+        ``file_path`` -- The path the document was saved to.
     """
     path = None
     try:
@@ -135,7 +136,7 @@ def handle_save_document(params):
 
     if not path:
         raise ValueError(
-            "Document has no file path — it has never been saved. "
+            "Document has no file path -- it has never been saved. "
             "Use files.save_document_as to save to a new path."
         )
 
@@ -162,16 +163,16 @@ def handle_save_document_as(params):
     Parameters
     ----------
     params : dict
-        ``file_path`` (str, required) — Absolute destination path, including
+        ``file_path`` (str, required) -- Absolute destination path, including
             the filename and ``.3dm`` extension.
-        ``overwrite`` (bool, optional, default True) — If False and the file
+        ``overwrite`` (bool, optional, default True) -- If False and the file
             already exists, raise an error rather than overwriting it.
 
     Returns
     -------
     dict
-        ``success``   — True on success.
-        ``file_path`` — The path the document was saved to.
+        ``success``   -- True on success.
+        ``file_path`` -- The path the document was saved to.
     """
     import os
 
@@ -212,14 +213,14 @@ def handle_new_document(params):
     Parameters
     ----------
     params : dict
-        ``template_path`` (str, optional) — Absolute path to a ``.3dm``
+        ``template_path`` (str, optional) -- Absolute path to a ``.3dm``
             template file.  Uses Rhino's default template when omitted.
 
     Returns
     -------
     dict
-        ``success`` — True if the command was issued without error.
-        ``template`` — The template argument passed to Rhino, or "_None".
+        ``success`` -- True if the command was issued without error.
+        ``template`` -- The template argument passed to Rhino, or "_None".
     """
     template = params.get("template_path") or params.get("template")
 
@@ -251,14 +252,14 @@ def handle_import_file(params):
     Parameters
     ----------
     params : dict
-        ``file_path`` (str, required) — Absolute path to the file to import.
+        ``file_path`` (str, required) -- Absolute path to the file to import.
 
     Returns
     -------
     dict
-        ``success``      — True if the import command completed.
-        ``file_path``    — The path that was imported.
-        ``object_count`` — Number of objects in the document after import
+        ``success``      -- True if the import command completed.
+        ``file_path``    -- The path that was imported.
+        ``object_count`` -- Number of objects in the document after import
                            minus the count before (newly added objects).
                            May be 0 if the import produced no geometry.
     """
@@ -301,19 +302,19 @@ def handle_export_objects(params):
     Parameters
     ----------
     params : dict
-        ``guids``     (list[str], required) — GUIDs of objects to export.
-        ``file_path`` (str, required)       — Absolute destination path
+        ``guids``     (list[str], required) -- GUIDs of objects to export.
+        ``file_path`` (str, required)       -- Absolute destination path
                                               including extension.
-        ``overwrite`` (bool, optional)      — Overwrite if file exists
+        ``overwrite`` (bool, optional)      -- Overwrite if file exists
                                               (default: True).
 
     Returns
     -------
     dict
-        ``success``         — True if the export command completed.
-        ``file_path``       — Destination path.
-        ``object_count``    — Number of GUIDs that were selected.
-        ``file_size_bytes`` — Size of the exported file, or -1 on error.
+        ``success``         -- True if the export command completed.
+        ``file_path``       -- Destination path.
+        ``object_count``    -- Number of GUIDs that were selected.
+        ``file_size_bytes`` -- Size of the exported file, or -1 on error.
     """
     import os
 
@@ -379,19 +380,19 @@ def handle_export_document(params):
     Parameters
     ----------
     params : dict
-        ``file_path``    (str, required) — Absolute destination path.
-        ``overwrite``    (bool, optional, default True) — Overwrite if exists.
-        ``selected_only`` (bool, optional, default False) — When True, only
+        ``file_path``    (str, required) -- Absolute destination path.
+        ``overwrite``    (bool, optional, default True) -- Overwrite if exists.
+        ``selected_only`` (bool, optional, default False) -- When True, only
             currently selected objects are exported (equivalent to
             ``export_selected``).
 
     Returns
     -------
     dict
-        ``success``         — True if the export command completed.
-        ``file_path``       — Destination path.
-        ``object_count``    — Total objects in the document (or selection).
-        ``file_size_bytes`` — Size of the exported file, or -1 on error.
+        ``success``         -- True if the export command completed.
+        ``file_path``       -- Destination path.
+        ``object_count``    -- Total objects in the document (or selection).
+        ``file_size_bytes`` -- Size of the exported file, or -1 on error.
     """
     import os
 
@@ -445,16 +446,16 @@ def handle_export_selected(params):
     Parameters
     ----------
     params : dict
-        ``file_path`` (str, required) — Absolute destination path.
+        ``file_path`` (str, required) -- Absolute destination path.
 
     Returns
     -------
     dict
-        ``success``         — True if the export command completed.
-        ``file_path``       — Destination path.
-        ``object_count``    — Number of objects that were selected at
+        ``success``         -- True if the export command completed.
+        ``file_path``       -- Destination path.
+        ``object_count``    -- Number of objects that were selected at
                               the time of export.
-        ``file_size_bytes`` — Size of the exported file, or -1 on error.
+        ``file_size_bytes`` -- Size of the exported file, or -1 on error.
     """
     file_path = params.get("file_path")
     if not file_path:
@@ -487,13 +488,13 @@ def handle_open_document(params):
     Parameters
     ----------
     params : dict
-        ``file_path`` (str, required) — Absolute path to the ``.3dm`` file.
+        ``file_path`` (str, required) -- Absolute path to the ``.3dm`` file.
 
     Returns
     -------
     dict
-        ``success``   — True if the open command was issued.
-        ``file_path`` — The path that was opened.
+        ``success``   -- True if the open command was issued.
+        ``file_path`` -- The path that was opened.
     """
     file_path = params.get("file_path")
     if not file_path:

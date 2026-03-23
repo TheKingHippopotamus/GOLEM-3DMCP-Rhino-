@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/manipulation.py
 ======================================
@@ -29,9 +30,9 @@ Registered methods (21 total):
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax,
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax,
   no lowercase ``list[...]`` / ``dict[...]`` generics in runtime annotations.
-* Zero external dependencies — only Python stdlib + Rhino-provided modules.
+* Zero external dependencies -- only Python stdlib + Rhino-provided modules.
 * All Rhino imports are guarded by a try/except so linters/CI outside Rhino
   can still import this module without exploding.
 * Every handler is decorated with both ``@handler`` (registration) and
@@ -48,9 +49,13 @@ Usage (from startup / server code)::
 """
 
 import math
+try:
+    from typing import Any, Dict, List, Optional
+except ImportError:
+    pass
 
 from rhino_plugin.dispatcher import handler
-from rhino_plugin.utils.error_handler import ErrorCode, GolemError, wrap_handler
+from rhino_plugin.utils.error_handler import wrap_handler, GolemError, ErrorCode
 
 # ---------------------------------------------------------------------------
 # Rhino-environment imports
@@ -60,10 +65,10 @@ from rhino_plugin.utils.error_handler import ErrorCode, GolemError, wrap_handler
 # without crashing; at runtime inside Rhino they always succeed.
 
 try:
-    import Rhino  # noqa: F401
+    import Rhino                           # noqa: F401
     import Rhino.Geometry as RG
-    import rhinoscriptsyntax as rs
     import scriptcontext as sc
+    import rhinoscriptsyntax as rs
     import System
     _RHINO_AVAILABLE = True
 except ImportError:
@@ -100,18 +105,20 @@ def _parse_point(raw, field_name="point"):
             return [float(raw["x"]), float(raw["y"]), float(raw["z"])]
         except (KeyError, TypeError, ValueError):
             raise ValueError(
-                f"'{field_name}' dict must contain numeric 'x', 'y', 'z' keys"
+                "'{field}' dict must contain numeric 'x', 'y', 'z' keys".format(
+                    field=field_name
+                )
             )
     if isinstance(raw, (list, tuple)) and len(raw) == 3:
         try:
             return [float(raw[0]), float(raw[1]), float(raw[2])]
         except (TypeError, ValueError):
             raise ValueError(
-                f"'{field_name}' list must contain 3 numbers"
+                "'{field}' list must contain 3 numbers".format(field=field_name)
             )
     raise ValueError(
-        f"'{field_name}' must be a list [x, y, z] or dict with 'x','y','z' keys, "
-        f"got: {type(raw).__name__}"
+        "'{field}' must be a list [x, y, z] or dict with 'x','y','z' keys, "
+        "got: {t}".format(field=field_name, t=type(raw).__name__)
     )
 
 
@@ -140,13 +147,17 @@ def _require_list_of_strings(value, field_name="ids"):
     """Validate that *value* is a non-empty list of strings."""
     if not isinstance(value, (list, tuple)) or len(value) == 0:
         raise ValueError(
-            f"'{field_name}' must be a non-empty list of GUID strings"
+            "'{field}' must be a non-empty list of GUID strings".format(
+                field=field_name
+            )
         )
     result = []
     for item in value:
         if not isinstance(item, str):
             raise ValueError(
-                f"Each item in '{field_name}' must be a string GUID, got: {type(item).__name__}"
+                "Each item in '{field}' must be a string GUID, got: {t}".format(
+                    field=field_name, t=type(item).__name__
+                )
             )
         result.append(item)
     return result
@@ -163,10 +174,10 @@ def _find_object(guid):
     try:
         sys_guid = System.Guid(guid)
     except Exception:
-        raise ValueError(f"Invalid GUID format: '{guid}'")
+        raise ValueError("Invalid GUID format: '{guid}'".format(guid=guid))
     obj = sc.doc.Objects.FindId(sys_guid)
     if obj is None:
-        raise KeyError(f"Object not found in Rhino document: '{guid}'")
+        raise KeyError("Object not found in Rhino document: '{guid}'".format(guid=guid))
     return obj
 
 
@@ -217,8 +228,8 @@ def move(params):
     Translate one or more objects by a displacement vector.
 
     Required params:
-        ids          (list[str]) — GUIDs of objects to move.
-        translation  (list[x,y,z] or dict) — displacement vector.
+        ids          (list[str]) -- GUIDs of objects to move.
+        translation  (list[x,y,z] or dict) -- displacement vector.
 
     Returns:
         {"moved_ids": list[str], "count": int}
@@ -238,7 +249,7 @@ def move(params):
     if result_guids is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.MoveObjects returned None — check that all GUIDs exist",
+            "rs.MoveObjects returned None -- check that all GUIDs exist",
             details={"ids": ids},
         )
 
@@ -259,10 +270,10 @@ def copy(params):
     Copy objects and optionally displace the copies.
 
     Required params:
-        ids          (list[str]) — GUIDs of objects to copy.
+        ids          (list[str]) -- GUIDs of objects to copy.
 
     Optional params:
-        translation  (list[x,y,z] or dict, default [0,0,0]) — displacement.
+        translation  (list[x,y,z] or dict, default [0,0,0]) -- displacement.
 
     Returns:
         {"new_ids": list[str], "count": int}
@@ -282,7 +293,7 @@ def copy(params):
     if result_guids is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.CopyObjects returned None — check that all GUIDs exist",
+            "rs.CopyObjects returned None -- check that all GUIDs exist",
             details={"ids": ids},
         )
 
@@ -303,13 +314,13 @@ def rotate(params):
     Rotate objects around an axis point by a given angle.
 
     Required params:
-        ids    (list[str])  — GUIDs of objects to rotate.
-        center (list[x,y,z] or dict) — point on the rotation axis.
-        angle  (float) — rotation angle in degrees.
+        ids    (list[str])  -- GUIDs of objects to rotate.
+        center (list[x,y,z] or dict) -- point on the rotation axis.
+        angle  (float) -- rotation angle in degrees.
 
     Optional params:
-        axis   (list[x,y,z] or dict, default [0,0,1]) — rotation axis vector.
-        copy   (bool, default False) — rotate copies, leave originals.
+        axis   (list[x,y,z] or dict, default [0,0,1]) -- rotation axis vector.
+        copy   (bool, default False) -- rotate copies, leave originals.
 
     Returns:
         {"result_ids": list[str], "count": int}
@@ -324,7 +335,7 @@ def rotate(params):
     try:
         angle_deg = float(angle_deg)
     except (TypeError, ValueError):
-        raise ValueError(f"'angle' must be a number, got: {angle_deg}")
+        raise ValueError("'angle' must be a number, got: {v}".format(v=angle_deg))
 
     axis = _parse_point_or_default(params.get("axis"), [0.0, 0.0, 1.0], "axis")
     copy_flag = bool(params.get("copy", False))
@@ -337,7 +348,7 @@ def rotate(params):
     if result_guids is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.RotateObjects returned None — verify GUIDs and parameters",
+            "rs.RotateObjects returned None -- verify GUIDs and parameters",
             details={"ids": ids, "center": center, "angle": angle_deg},
         )
 
@@ -358,13 +369,13 @@ def scale(params):
     Scale objects uniformly or non-uniformly.
 
     Required params:
-        ids          (list[str]) — GUIDs of objects to scale.
-        origin       (list[x,y,z] or dict) — centre of scaling.
-        scale_factor (float or list[x,y,z]) — uniform scale if float;
+        ids          (list[str]) -- GUIDs of objects to scale.
+        origin       (list[x,y,z] or dict) -- centre of scaling.
+        scale_factor (float or list[x,y,z]) -- uniform scale if float;
                      non-uniform if a 3-element list.
 
     Optional params:
-        copy (bool, default False) — scale copies, leave originals.
+        copy (bool, default False) -- scale copies, leave originals.
 
     Returns:
         {"result_ids": list[str], "count": int}
@@ -395,7 +406,7 @@ def scale(params):
     else:
         raise ValueError(
             "'scale_factor' must be a float (uniform) or list [sx, sy, sz] "
-            f"(non-uniform), got: {type(scale_raw).__name__}"
+            "(non-uniform), got: {t}".format(t=type(scale_raw).__name__)
         )
 
     scale_pt = RG.Point3d(sx, sy, sz)
@@ -404,7 +415,7 @@ def scale(params):
     if result_guids is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.ScaleObjects returned None — verify GUIDs and parameters",
+            "rs.ScaleObjects returned None -- verify GUIDs and parameters",
             details={"ids": ids, "origin": origin, "scale_factor": scale_raw},
         )
 
@@ -425,12 +436,12 @@ def mirror(params):
     Mirror objects across a plane defined by two points.
 
     Required params:
-        ids   (list[str]) — GUIDs of objects to mirror.
-        start (list[x,y,z] or dict) — first point on the mirror plane.
-        end   (list[x,y,z] or dict) — second point on the mirror plane.
+        ids   (list[str]) -- GUIDs of objects to mirror.
+        start (list[x,y,z] or dict) -- first point on the mirror plane.
+        end   (list[x,y,z] or dict) -- second point on the mirror plane.
 
     Optional params:
-        copy (bool, default False) — mirror copies, leave originals.
+        copy (bool, default False) -- mirror copies, leave originals.
 
     Returns:
         {"result_ids": list[str], "count": int}
@@ -450,7 +461,7 @@ def mirror(params):
     if result_guids is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.MirrorObjects returned None — verify GUIDs and parameters",
+            "rs.MirrorObjects returned None -- verify GUIDs and parameters",
             details={"ids": ids, "start": start, "end": end},
         )
 
@@ -475,12 +486,12 @@ def orient(params):
     rs.OrientObject (which operates on a single object per call).
 
     Required params:
-        ids              (list[str]) — GUIDs of objects to orient.
-        reference_points (list of [x,y,z]) — 2 or 3 source points.
-        target_points    (list of [x,y,z]) — 2 or 3 destination points.
+        ids              (list[str]) -- GUIDs of objects to orient.
+        reference_points (list of [x,y,z]) -- 2 or 3 source points.
+        target_points    (list of [x,y,z]) -- 2 or 3 destination points.
 
     Optional params:
-        copy (bool, default False) — orient copies, leave originals.
+        copy (bool, default False) -- orient copies, leave originals.
 
     Returns:
         {"result_ids": list[str], "count": int}
@@ -499,9 +510,9 @@ def orient(params):
     if len(ref_raw) < 2:
         raise ValueError("At least 2 reference/target point pairs are required")
 
-    ref_pts = [_to_rhino_point(_parse_point(p, f"reference_points[{i}]"))
+    ref_pts = [_to_rhino_point(_parse_point(p, "reference_points[{i}]".format(i=i)))
                for i, p in enumerate(ref_raw)]
-    tgt_pts = [_to_rhino_point(_parse_point(p, f"target_points[{i}]"))
+    tgt_pts = [_to_rhino_point(_parse_point(p, "target_points[{i}]".format(i=i)))
                for i, p in enumerate(tgt_raw)]
     copy_flag = bool(params.get("copy", False))
 
@@ -514,7 +525,7 @@ def orient(params):
     if not result_ids:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.OrientObject returned None for all objects — verify GUIDs",
+            "rs.OrientObject returned None for all objects -- verify GUIDs",
             details={"ids": ids},
         )
 
@@ -534,13 +545,13 @@ def shear(params):
     Shear objects using a Rhino.Geometry.Transform.Shear transform.
 
     Required params:
-        ids             (list[str]) — GUIDs of objects to shear.
-        plane           (dict with 'origin', 'x_axis', 'y_axis') — shear plane.
-        shear_angle     (float) — shear angle in degrees.
-        shear_direction (list[x,y,z] or dict) — direction vector of shear.
+        ids             (list[str]) -- GUIDs of objects to shear.
+        plane           (dict with 'origin', 'x_axis', 'y_axis') -- shear plane.
+        shear_angle     (float) -- shear angle in degrees.
+        shear_direction (list[x,y,z] or dict) -- direction vector of shear.
 
     Optional params:
-        copy (bool, default False) — shear copies, leave originals.
+        copy (bool, default False) -- shear copies, leave originals.
 
     Returns:
         {"result_ids": list[str], "count": int}
@@ -605,7 +616,7 @@ def shear(params):
         try:
             sys_guid = System.Guid(obj_id)
         except Exception:
-            raise ValueError(f"Invalid GUID format: '{obj_id}'")
+            raise ValueError("Invalid GUID format: '{g}'".format(g=obj_id))
 
         if copy_flag:
             new_guid = sc.doc.Objects.Transform(sys_guid, xform, False)
@@ -639,9 +650,9 @@ def array_linear(params):
     Create a linear array of an object along a direction vector.
 
     Required params:
-        id        (str) — GUID of the object to array.
-        count     (int) — total number of items in the array (including original).
-        direction (list[x,y,z] or dict) — spacing vector between copies.
+        id        (str) -- GUID of the object to array.
+        count     (int) -- total number of items in the array (including original).
+        direction (list[x,y,z] or dict) -- spacing vector between copies.
 
     Returns:
         {"array_ids": list[str], "count": int}
@@ -669,7 +680,7 @@ def array_linear(params):
     if result_guids is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.ArrayLinear returned None — verify the GUID and parameters",
+            "rs.ArrayLinear returned None -- verify the GUID and parameters",
             details={"id": obj_id, "count": count, "direction": direction},
         )
 
@@ -690,13 +701,13 @@ def array_polar(params):
     Create a polar (circular) array of an object around a centre point.
 
     Required params:
-        id     (str) — GUID of the object to array.
-        count  (int) — total number of items (including original).
-        center (list[x,y,z] or dict) — centre of rotation.
+        id     (str) -- GUID of the object to array.
+        count  (int) -- total number of items (including original).
+        center (list[x,y,z] or dict) -- centre of rotation.
 
     Optional params:
-        angle (float, default 360) — total arc angle in degrees.
-        axis  (list[x,y,z] or dict, default [0,0,1]) — rotation axis.
+        angle (float, default 360) -- total arc angle in degrees.
+        axis  (list[x,y,z] or dict, default [0,0,1]) -- rotation axis.
 
     Returns:
         {"array_ids": list[str], "count": int}
@@ -728,7 +739,7 @@ def array_polar(params):
     if result_guids is None:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.ArrayPolar returned None — verify the GUID and parameters",
+            "rs.ArrayPolar returned None -- verify the GUID and parameters",
             details={"id": obj_id, "count": count, "center": center},
         )
 
@@ -756,12 +767,12 @@ def array_along_curve(params):
          the curve tangent at that point.
 
     Required params:
-        id       (str) — GUID of the object to array.
-        curve_id (str) — GUID of the guide curve.
-        count    (int) — number of copies to place (not including the original).
+        id       (str) -- GUID of the object to array.
+        curve_id (str) -- GUID of the guide curve.
+        count    (int) -- number of copies to place (not including the original).
 
     Optional params:
-        orient (bool, default True) — align each copy to the curve tangent.
+        orient (bool, default True) -- align each copy to the curve tangent.
 
     Returns:
         {"array_ids": list[str], "count": int}
@@ -793,7 +804,7 @@ def array_along_curve(params):
     curve_geom = crv_obj.Geometry
     if not isinstance(curve_geom, RG.Curve):
         raise ValueError(
-            f"'curve_id' does not refer to a curve object: '{curve_id}'"
+            "'curve_id' does not refer to a curve object: '{g}'".format(g=curve_id)
         )
 
     # Divide the curve into count segments -> (count+1) points but we want
@@ -877,11 +888,11 @@ def apply_transform(params):
     Apply an arbitrary 4x4 affine transformation matrix to objects.
 
     Required params:
-        ids    (list[str]) — GUIDs of objects to transform.
-        matrix (list[list[float]]) — 4x4 nested list (row-major).
+        ids    (list[str]) -- GUIDs of objects to transform.
+        matrix (list[list[float]]) -- 4x4 nested list (row-major).
 
     Optional params:
-        copy (bool, default False) — transform copies, leave originals.
+        copy (bool, default False) -- transform copies, leave originals.
 
     Returns:
         {"result_ids": list[str], "count": int}
@@ -897,7 +908,7 @@ def apply_transform(params):
     for row_idx, row in enumerate(matrix_raw):
         if not isinstance(row, (list, tuple)) or len(row) != 4:
             raise ValueError(
-                f"'matrix' row {row_idx} must have exactly 4 elements"
+                "'matrix' row {r} must have exactly 4 elements".format(r=row_idx)
             )
 
     copy_flag = bool(params.get("copy", False))
@@ -910,7 +921,7 @@ def apply_transform(params):
                 xform[r, c] = float(matrix_raw[r][c])
             except (TypeError, ValueError):
                 raise ValueError(
-                    f"'matrix[{r}][{c}]' must be a number"
+                    "'matrix[{r}][{c}]' must be a number".format(r=r, c=c)
                 )
 
     if not xform.IsValid:
@@ -925,7 +936,7 @@ def apply_transform(params):
         try:
             sys_guid = System.Guid(obj_id)
         except Exception:
-            raise ValueError(f"Invalid GUID format: '{obj_id}'")
+            raise ValueError("Invalid GUID format: '{g}'".format(g=obj_id))
 
         new_guid = sc.doc.Objects.Transform(sys_guid, xform, not copy_flag)
         if new_guid != System.Guid.Empty:
@@ -954,7 +965,7 @@ def delete(params):
     Delete one or more objects from the Rhino document.
 
     Required params:
-        ids (list[str]) — GUIDs of objects to delete.
+        ids (list[str]) -- GUIDs of objects to delete.
 
     Returns:
         {"deleted_count": int}
@@ -980,10 +991,10 @@ def group(params):
     Add objects to a new named group.
 
     Required params:
-        ids  (list[str]) — GUIDs of objects to group.
+        ids  (list[str]) -- GUIDs of objects to group.
 
     Optional params:
-        name (str) — desired group name; Rhino will auto-generate one if omitted.
+        name (str) -- desired group name; Rhino will auto-generate one if omitted.
 
     Returns:
         {"group_name": str}
@@ -1014,7 +1025,9 @@ def group(params):
             pass
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            f"rs.AddObjectsToGroup could not add objects to group '{group_name}'",
+            "rs.AddObjectsToGroup could not add objects to group '{g}'".format(
+                g=group_name
+            ),
             details={"ids": ids, "group_name": group_name},
         )
 
@@ -1033,7 +1046,7 @@ def ungroup(params):
     Dissolve a group, freeing all member objects.
 
     Required params:
-        group_name (str) — name of the group to dissolve.
+        group_name (str) -- name of the group to dissolve.
 
     Returns:
         {"freed_ids": list[str], "count": int}
@@ -1055,7 +1068,7 @@ def ungroup(params):
     if not success:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            f"rs.DeleteGroup failed for group '{group_name}'",
+            "rs.DeleteGroup failed for group '{g}'".format(g=group_name),
             details={"group_name": group_name},
         )
 
@@ -1078,10 +1091,10 @@ def join(params):
     - If the majority are Curve → rs.JoinCurves
 
     Required params:
-        ids (list[str]) — GUIDs of objects to join (minimum 2).
+        ids (list[str]) -- GUIDs of objects to join (minimum 2).
 
     Optional params:
-        delete_input (bool, default True) — delete input objects after join.
+        delete_input (bool, default True) -- delete input objects after join.
 
     Returns:
         {"joined_ids": list[str], "count": int}
@@ -1111,7 +1124,7 @@ def join(params):
     if not joined:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "Join operation returned no results — objects may not be joinable",
+            "Join operation returned no results -- objects may not be joinable",
             details={"ids": ids},
         )
 
@@ -1136,10 +1149,10 @@ def explode(params):
     Explode a joined object into its component parts.
 
     Required params:
-        id (str) — GUID of the object to explode.
+        id (str) -- GUID of the object to explode.
 
     Optional params:
-        delete_input (bool, default True) — delete the input object after explode.
+        delete_input (bool, default True) -- delete the input object after explode.
 
     Returns:
         {"exploded_ids": list[str], "count": int}
@@ -1159,7 +1172,7 @@ def explode(params):
     if not result:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.ExplodeObjects returned no results — object may not be explodable",
+            "rs.ExplodeObjects returned no results -- object may not be explodable",
             details={"id": obj_id},
         )
 
@@ -1180,15 +1193,15 @@ def set_properties(params):
     Set display/document properties on one or more objects.
 
     Required params:
-        ids (list[str]) — GUIDs of objects to modify.
+        ids (list[str]) -- GUIDs of objects to modify.
 
     Optional params (apply whichever are provided):
-        layer          (str) — layer name (must already exist in document).
-        color          (list [r,g,b] or [r,g,b,a]) — object colour (0-255 per channel).
-        name           (str) — object name.
-        visible        (bool) — show/hide the object.
-        locked         (bool) — lock/unlock the object.
-        material_index (int) — render material index.
+        layer          (str) -- layer name (must already exist in document).
+        color          (list [r,g,b] or [r,g,b,a]) -- object colour (0-255 per channel).
+        name           (str) -- object name.
+        visible        (bool) -- show/hide the object.
+        locked         (bool) -- lock/unlock the object.
+        material_index (int) -- render material index.
 
     Returns:
         {"updated_ids": list[str], "count": int, "applied": dict}
@@ -1211,7 +1224,7 @@ def set_properties(params):
             raise ValueError("'layer' must be a string")
         if rs.IsLayer(layer) is False:
             raise ValueError(
-                f"Layer '{layer}' does not exist in the document"
+                "Layer '{l}' does not exist in the document".format(l=layer)
             )
 
     # Validate colour.
@@ -1235,11 +1248,11 @@ def set_properties(params):
         try:
             sys_guid = System.Guid(obj_id)
         except Exception:
-            raise ValueError(f"Invalid GUID format: '{obj_id}'")
+            raise ValueError("Invalid GUID format: '{g}'".format(g=obj_id))
 
         rh_obj = sc.doc.Objects.FindId(sys_guid)
         if rh_obj is None:
-            raise KeyError(f"Object not found in Rhino document: '{obj_id}'")
+            raise KeyError("Object not found in Rhino document: '{g}'".format(g=obj_id))
 
         attrs = rh_obj.Attributes.Duplicate()
 
@@ -1309,12 +1322,12 @@ def set_user_text(params):
     Set a user-text key/value pair on an object.
 
     Required params:
-        id    (str) — GUID of the target object.
-        key   (str) — user-text key.
-        value (str) — user-text value.
+        id    (str) -- GUID of the target object.
+        key   (str) -- user-text key.
+        value (str) -- user-text value.
 
     Optional params:
-        attached_to_geometry (bool, default False) — attach to geometry rather
+        attached_to_geometry (bool, default False) -- attach to geometry rather
             than object attributes.
 
     Returns:
@@ -1340,7 +1353,7 @@ def set_user_text(params):
     if not result:
         raise GolemError(
             ErrorCode.OPERATION_FAILED,
-            "rs.SetUserText returned False — could not set user text",
+            "rs.SetUserText returned False -- could not set user text",
             details={"id": obj_id, "key": key},
         )
 
@@ -1364,10 +1377,10 @@ def get_user_text(params):
     Retrieve user-text from an object.
 
     Required params:
-        id (str) — GUID of the target object.
+        id (str) -- GUID of the target object.
 
     Optional params:
-        key (str) — specific key to retrieve; if omitted, returns all
+        key (str) -- specific key to retrieve; if omitted, returns all
             key/value pairs as a dict.
 
     Returns:
@@ -1420,7 +1433,7 @@ def select_objects(params):
     Select one or more objects in the Rhino viewport.
 
     Required params:
-        ids (list[str]) — GUIDs of objects to select.
+        ids (list[str]) -- GUIDs of objects to select.
 
     Returns:
         {"selected_ids": list[str], "count": int}

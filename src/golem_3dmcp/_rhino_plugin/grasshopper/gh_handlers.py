@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/grasshopper/gh_handlers.py
 =========================================
 Low-level Grasshopper utility functions used by the main handler layer.
 
 These functions sit one step below ``handlers/grasshopper.py``.  They deal
-directly with the Grasshopper object model — serialising components and
-parameters, reading/writing values, and baking geometry — but they do NOT
+directly with the Grasshopper object model -- serialising components and
+parameters, reading/writing values, and baking geometry -- but they do NOT
 register dispatcher handlers or raise JSON-RPC errors.  All errors propagate
 as plain Python exceptions for the caller to handle.
 
@@ -27,6 +28,10 @@ Python 3.9 compatibility
 Author: GOLEM-3DMCP
 """
 
+try:
+    from typing import Any, Dict, List, Optional
+except ImportError:
+    pass
 
 # ---------------------------------------------------------------------------
 # Grasshopper / Rhino availability guard
@@ -36,14 +41,16 @@ _GH_AVAILABLE = False
 _GH_IMPORT_ERROR = ""
 
 try:
-    import clr  # type: ignore
+    import clr                                                   # type: ignore
     clr.AddReference("Grasshopper")
-    import Rhino.Geometry as RG  # type: ignore
-    from Grasshopper.Kernel.Special import (
-        GH_BooleanToggle,  # type: ignore
-        GH_NumberSlider,  # type: ignore
-        GH_Panel,  # type: ignore
-    )
+    import Grasshopper                                           # type: ignore
+    from Grasshopper.Kernel import GH_Document                  # type: ignore
+    from Grasshopper.Kernel.Special import GH_NumberSlider      # type: ignore
+    from Grasshopper.Kernel.Special import GH_Panel             # type: ignore
+    from Grasshopper.Kernel.Special import GH_BooleanToggle     # type: ignore
+    import Rhino                                                 # type: ignore
+    import Rhino.Geometry as RG                                  # type: ignore
+    import scriptcontext as sc                                   # type: ignore
     _GH_AVAILABLE = True
 except Exception as _exc:
     _GH_IMPORT_ERROR = str(_exc)
@@ -105,13 +112,13 @@ def serialize_gh_component(component):
     Returns
     -------
     dict with keys:
-        nickname       : str    — component NickName
-        name           : str    — component Name
-        type           : str    — Python type name of the component class
-        guid           : str    — instance GUID as string
-        position       : dict   — {"x": float, "y": float}
-        input_params   : list   — each entry is a serialised input param dict
-        output_params  : list   — each entry is a serialised output param dict
+        nickname       : str    -- component NickName
+        name           : str    -- component Name
+        type           : str    -- Python type name of the component class
+        guid           : str    -- instance GUID as string
+        position       : dict   -- {"x": float, "y": float}
+        input_params   : list   -- each entry is a serialised input param dict
+        output_params  : list   -- each entry is a serialised output param dict
     """
     result = {
         "nickname": "",
@@ -188,7 +195,7 @@ def serialize_gh_param(component):
 
     Returns
     -------
-    dict — type-specific structure:
+    dict -- type-specific structure:
 
     Slider::
 
@@ -214,7 +221,7 @@ def serialize_gh_param(component):
     if not _GH_AVAILABLE:
         raise RuntimeError(
             "Grasshopper is not available. "
-            f"Import error: {_GH_IMPORT_ERROR}"
+            "Import error: {err}".format(err=_GH_IMPORT_ERROR)
         )
 
     # --- GH_NumberSlider ---
@@ -327,17 +334,17 @@ def set_param_value(component, param_name, value):
 
     The function inspects the concrete type of *component* and applies the
     appropriate setter.  *param_name* is accepted for API consistency but is
-    currently unused — the value is applied to the component itself (for
+    currently unused -- the value is applied to the component itself (for
     standalone param components such as sliders, panels, and toggles).
 
     Supports:
-    * ``GH_NumberSlider``  — clamps *value* to [min, max] and calls
+    * ``GH_NumberSlider``  -- clamps *value* to [min, max] and calls
       ``SetSliderValue(Decimal)``
-    * ``GH_Panel``         — sets ``UserText`` string property
-    * ``GH_BooleanToggle`` — sets ``Value`` bool property
-    * Generic ``IGH_Param`` with ``AddVolatileData`` — injects a single
+    * ``GH_Panel``         -- sets ``UserText`` string property
+    * ``GH_BooleanToggle`` -- sets ``Value`` bool property
+    * Generic ``IGH_Param`` with ``AddVolatileData`` -- injects a single
       GH_Number / GH_String via the volatile data mechanism
-    * ``Grasshopper.Kernel.Parameters.Param_Number`` — same mechanism
+    * ``Grasshopper.Kernel.Parameters.Param_Number`` -- same mechanism
 
     Raises
     ------
@@ -347,13 +354,13 @@ def set_param_value(component, param_name, value):
     if not _GH_AVAILABLE:
         raise RuntimeError(
             "Grasshopper is not available. "
-            f"Import error: {_GH_IMPORT_ERROR}"
+            "Import error: {err}".format(err=_GH_IMPORT_ERROR)
         )
 
     # --- GH_NumberSlider ---
     try:
         if isinstance(component, GH_NumberSlider):
-            import System  # type: ignore
+            import System                                        # type: ignore
             min_val = float(component.Slider.Minimum)
             max_val = float(component.Slider.Maximum)
             clamped = max(min_val, min(max_val, float(value)))
@@ -393,7 +400,8 @@ def set_param_value(component, param_name, value):
     # --- Generic IGH_Param: inject via volatile data ---
     try:
         if hasattr(component, "AddVolatileData"):
-            from Grasshopper.Kernel.Data import GH_Path  # type: ignore
+            from Grasshopper.Kernel.Data import GH_Path        # type: ignore
+            from Grasshopper import DataTree                    # type: ignore
             component.ClearData()
             gh_path = GH_Path(0)
             gh_value = _wrap_as_gh_goo(value)
@@ -442,7 +450,7 @@ def bake_component_output(component, doc, layer=None):
     if not _GH_AVAILABLE:
         raise RuntimeError(
             "Grasshopper is not available. "
-            f"Import error: {_GH_IMPORT_ERROR}"
+            "Import error: {err}".format(err=_GH_IMPORT_ERROR)
         )
 
     baked_guids = []  # type: List[str]
@@ -491,7 +499,7 @@ def _summarise_param_data(param):
             branch = vd.get_Branch(vd.Paths[0])
             if branch and len(branch) > 0:
                 return _safe_str(_unwrap_gh_goo(branch[0]))
-        return f"<{count} items>"
+        return "<{n} items>".format(n=count)
     except Exception:
         return None
 
@@ -502,7 +510,7 @@ def _unwrap_gh_goo(goo):
     Extract the underlying Python / .NET value from a GH_Goo wrapper.
 
     Tries several unwrapping strategies in order:
-    1. ``goo.Value``   — works for GH_Number, GH_Boolean, GH_String, etc.
+    1. ``goo.Value``   -- works for GH_Number, GH_Boolean, GH_String, etc.
     2. ``goo.IsValid`` check + cast to float / str / bool
     3. Fall back to ``str(goo)``
 
@@ -537,7 +545,7 @@ def _unwrap_gh_goo(goo):
     except Exception:
         pass
 
-    # Try geometry — return a compact summary dict.
+    # Try geometry -- return a compact summary dict.
     if _GH_AVAILABLE:
         try:
             if isinstance(value, RG.Point3d):
@@ -566,12 +574,10 @@ def _wrap_as_gh_goo(value):
     Grasshopper's volatile data mechanism.
     """
     try:
-        from Grasshopper.Kernel.Types import (
-            GH_Boolean,  # type: ignore
-            GH_Number,  # type: ignore
-            GH_Point,  # type: ignore
-            GH_String,  # type: ignore
-        )
+        from Grasshopper.Kernel.Types import GH_Number    # type: ignore
+        from Grasshopper.Kernel.Types import GH_String    # type: ignore
+        from Grasshopper.Kernel.Types import GH_Boolean   # type: ignore
+        from Grasshopper.Kernel.Types import GH_Point     # type: ignore
     except Exception:
         # If we cannot import the wrappers, return the raw value and let GH
         # handle the conversion.
@@ -613,7 +619,7 @@ def _resolve_layer(doc, layer_name):
             return existing_index
 
         # Create the layer.
-        import Rhino.DocObjects as RDO  # type: ignore
+        import Rhino.DocObjects as RDO                    # type: ignore
         new_layer = RDO.Layer()
         new_layer.Name = layer_name
         new_index = doc.Layers.Add(new_layer)
@@ -637,7 +643,7 @@ def _bake_single_item(goo_item, doc, layer_index):
     be baked (e.g. it carries non-geometry data).
     """
     try:
-        import Rhino.DocObjects as RDO  # type: ignore
+        import Rhino.DocObjects as RDO                    # type: ignore
         value = _unwrap_gh_goo(goo_item)
 
         # If the goo exposes a BakeGeometry method, use it (honoured by

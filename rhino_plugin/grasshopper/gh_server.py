@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/grasshopper/gh_server.py
 =======================================
@@ -15,10 +16,10 @@ defined in ``rhino_plugin.protocol``.
 
 Architecture
 ------------
-* Single background thread — same philosophy as ``server.py``.
+* Single background thread -- same philosophy as ``server.py``.
 * GH operations are always marshalled onto the Rhino UI thread via
   ``run_on_ui_thread()`` (imported from ``server.py``).
-* Shares the global dispatcher from ``rhino_plugin.dispatcher`` — no separate
+* Shares the global dispatcher from ``rhino_plugin.dispatcher`` -- no separate
   registry needed; all ``grasshopper.*`` methods registered by
   ``handlers/grasshopper.py`` are automatically available here too.
 * The server can be started and stopped independently of the main server.
@@ -37,7 +38,10 @@ import json
 import socket
 import threading
 import traceback
-from typing import Any, Optional
+try:
+    from typing import Any, Optional
+except ImportError:
+    pass
 
 from rhino_plugin.protocol import send_message, recv_message
 
@@ -77,7 +81,7 @@ def _log(message):
 
 # ---------------------------------------------------------------------------
 # UI-thread dispatch (reuse logic from server.py without creating a circular
-# import — we import from server at dispatch time inside the handler loop)
+# import -- we import from server at dispatch time inside the handler loop)
 # ---------------------------------------------------------------------------
 
 def _run_on_ui_thread(func):
@@ -331,7 +335,7 @@ def start_gh_server(host=GH_DEFAULT_HOST, port=GH_DEFAULT_PORT):
         try:
             srv.bind((host, port))
         except OSError as exc:
-            _log("GH server: failed to bind {h}:{p} — {exc}".format(
+            _log("GH server: failed to bind {h}:{p} -- {exc}".format(
                 h=host, p=port, exc=exc))
             srv.close()
             raise

@@ -1,17 +1,18 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/scene.py
 ================================
 Scene Intelligence handlers for GOLEM-3DMCP.
 
 Provides document inspection, layer management, object querying, group and
-block enumeration, and layer mutation — all running **inside Rhino 3D** under
+block enumeration, and layer mutation -- all running **inside Rhino 3D** under
 Python 3.9.
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax,
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax,
   no lowercase ``dict[...]`` / ``list[...]`` generics in runtime annotations.
-* Zero external dependencies — only Python stdlib + Rhino APIs.
+* Zero external dependencies -- only Python stdlib + Rhino APIs.
 * Every handler accepts a single ``params`` dict and returns a JSON-serialisable
   dict.  All handlers are decorated with ``@handler("scene.<name>")`` so that
   the dispatcher routes ``scene.*`` method names here automatically.
@@ -32,19 +33,24 @@ Wire method names (must match ``mcp_server/tools/scene.py`` exactly):
 """
 
 import fnmatch
+try:
+    from typing import Any, Dict, List, Optional
+except ImportError:
+    pass
 
 try:
-    import Rhino  # noqa: F401
-    import Rhino.Geometry as RG  # noqa: F401
-    import rhinoscriptsyntax as rs  # noqa: F401
-    import scriptcontext as sc  # noqa: F401
-    import System  # noqa: F401
+    import Rhino                                   # noqa: F401
+    import Rhino.Geometry as RG                    # noqa: F401
+    import scriptcontext as sc                     # noqa: F401
+    import rhinoscriptsyntax as rs                 # noqa: F401
+    import System                                  # noqa: F401
     _RHINO_AVAILABLE = True
 except ImportError:
     _RHINO_AVAILABLE = False
 
 from rhino_plugin.dispatcher import handler
-from rhino_plugin.utils.geometry_serializer import serialize_any, serialize_object
+from rhino_plugin.utils.geometry_serializer import serialize_object, serialize_any
+
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -125,7 +131,7 @@ def _object_type_matches(rhino_object, type_filter):
         return isinstance(geom, RG.AnnotationBase)
     if tf == "light":
         return isinstance(geom, RG.Light)
-    # Unknown filter — include everything so callers get data rather than nothing.
+    # Unknown filter -- include everything so callers get data rather than nothing.
     return True
 
 
@@ -228,10 +234,10 @@ def get_document_info(params):
     Returns
     -------
     dict with keys:
-        file_path       : str   — absolute path to the 3dm file (empty if unsaved)
-        units           : str   — model unit system as a human-readable string
+        file_path       : str   -- absolute path to the 3dm file (empty if unsaved)
+        units           : str   -- model unit system as a human-readable string
         absolute_tolerance : float
-        angle_tolerance : float — in degrees
+        angle_tolerance : float -- in degrees
         object_count    : int
         layer_count     : int
     """
@@ -327,23 +333,23 @@ def list_objects(params):
 
     Params (all optional)
     -----
-    object_type   : str  — one of "point","curve","surface","brep","mesh",
+    object_type   : str  -- one of "point","curve","surface","brep","mesh",
                           "extrusion","subd","annotation","light","all"
                           (default "all")
-    layer         : str  — full layer path; restrict to objects on this layer
-    name_pattern  : str  — wildcard pattern (fnmatch style) matched against
+    layer         : str  -- full layer path; restrict to objects on this layer
+    name_pattern  : str  -- wildcard pattern (fnmatch style) matched against
                           object names
-    selected_only : bool — only return currently selected objects (default False)
-    offset        : int  — skip this many objects before collecting (default 0)
-    limit         : int  — maximum objects to return (default 100, 0 = no cap)
+    selected_only : bool -- only return currently selected objects (default False)
+    offset        : int  -- skip this many objects before collecting (default 0)
+    limit         : int  -- maximum objects to return (default 100, 0 = no cap)
 
     Returns
     -------
     dict with keys:
         objects : list of serialised object dicts
-        total   : int — total matching objects before pagination
-        offset  : int — echoed back
-        limit   : int — echoed back
+        total   : int -- total matching objects before pagination
+        offset  : int -- echoed back
+        limit   : int -- echoed back
     """
     if not _RHINO_AVAILABLE:
         return {"objects": [], "total": 0, "offset": 0, "limit": 100}
@@ -368,7 +374,7 @@ def list_objects(params):
         try:
             li = sc.doc.Layers.FindByFullPath(layer_filter, -1)
             if li < 0:
-                # Layer not found — return empty result rather than everything.
+                # Layer not found -- return empty result rather than everything.
                 return {"objects": [], "total": 0, "offset": offset, "limit": limit}
             target_layer_index = li
         except Exception:
@@ -450,18 +456,18 @@ def get_object_info(params):
 
     Params
     ------
-    guid : str  — object GUID (braces optional)
+    guid : str  -- object GUID (braces optional)
 
     Returns
     -------
-    dict — serialised object (same schema as serialize_object) plus a
+    dict -- serialised object (same schema as serialize_object) plus a
     ``geometry_detail`` key containing the output of ``serialize_any`` on the
     raw geometry object.
 
     Raises
     ------
-    ValueError  — if ``guid`` param is missing or empty
-    KeyError    — if no object with that GUID exists in the document
+    ValueError  -- if ``guid`` param is missing or empty
+    KeyError    -- if no object with that GUID exists in the document
     """
     guid_str = params.get("guid", "")  # type: str
     if not guid_str:
@@ -477,13 +483,13 @@ def get_object_info(params):
         sys_guid = System.Guid(normalised)
     except Exception:
         raise ValueError(
-            f"Invalid GUID format: '{guid_str}'"
+            "Invalid GUID format: '{guid}'".format(guid=guid_str)
         )
 
     obj = sc.doc.Objects.FindId(sys_guid)
     if obj is None:
         raise KeyError(
-            f"Object not found in Rhino document: '{guid_str}'"
+            "Object not found in Rhino document: '{guid}'".format(guid=guid_str)
         )
 
     result = serialize_object(obj)  # type: Dict[str, Any]
@@ -530,6 +536,7 @@ def get_object_info(params):
             except Exception:
                 pass
             try:
+                from Rhino.DocObjects import ObjectColorSource
                 attrs_dict["color_source"] = str(attrs.ColorSource)
             except Exception:
                 pass
@@ -538,6 +545,7 @@ def get_object_info(params):
             except Exception:
                 pass
             try:
+                from Rhino.DocObjects import ObjectMode
                 attrs_dict["mode"] = str(attrs.Mode)
             except Exception:
                 pass
@@ -662,8 +670,8 @@ def get_blocks(params):
         name           : str
         description    : str
         object_count   : int
-        geometry_guids : list of str — GUIDs of the geometry objects inside the block
-        is_referenced  : bool — True if the block came from a linked/embedded file
+        geometry_guids : list of str -- GUIDs of the geometry objects inside the block
+        is_referenced  : bool -- True if the block came from a linked/embedded file
     """
     if not _RHINO_AVAILABLE:
         return {"blocks": []}
@@ -741,17 +749,17 @@ def create_layer(params):
 
     Params
     ------
-    name        : str  — layer name (required); use '::' for nested paths
-    color       : dict — optional {r, g, b, a} (defaults to black)
-    parent_name : str  — optional full path of parent layer
-    visible     : bool — default True
-    locked      : bool — default False
+    name        : str  -- layer name (required); use '::' for nested paths
+    color       : dict -- optional {r, g, b, a} (defaults to black)
+    parent_name : str  -- optional full path of parent layer
+    visible     : bool -- default True
+    locked      : bool -- default False
 
     Returns
     -------
     dict with keys:
-        layer_index : int  — index of the newly created layer
-        full_path   : str  — full layer path as created
+        layer_index : int  -- index of the newly created layer
+        full_path   : str  -- full layer path as created
         success     : bool
     """
     name = params.get("name", "")  # type: str
@@ -799,7 +807,7 @@ def create_layer(params):
 
     if layer_index < 0:
         raise RuntimeError(
-            f"Rhino failed to create layer '{name}'."
+            "Rhino failed to create layer '{name}'.".format(name=name)
         )
 
     full_path = ""
@@ -829,21 +837,21 @@ def delete_layer(params):
 
     Params
     ------
-    name           : str  — full layer path (required)
-    delete_objects : bool — if True, delete objects on the layer too;
+    name           : str  -- full layer path (required)
+    delete_objects : bool -- if True, delete objects on the layer too;
                            if False (default), the call fails when objects exist
 
     Returns
     -------
     dict with keys:
         success         : bool
-        deleted_objects : int — count of objects deleted (0 unless delete_objects=True)
-        message         : str — human-readable status
+        deleted_objects : int -- count of objects deleted (0 unless delete_objects=True)
+        message         : str -- human-readable status
 
     Raises
     ------
-    ValueError   — if layer name is missing or layer is not found
-    RuntimeError — if the layer has objects and delete_objects is False,
+    ValueError   -- if layer name is missing or layer is not found
+    RuntimeError -- if the layer has objects and delete_objects is False,
                    or if Rhino refuses to delete it (e.g. current layer)
     """
     name = params.get("name", "")  # type: str
@@ -858,13 +866,13 @@ def delete_layer(params):
     layer_index = sc.doc.Layers.FindByFullPath(str(name), -1)
     if layer_index < 0:
         raise ValueError(
-            f"Layer not found: '{name}'"
+            "Layer not found: '{name}'".format(name=name)
         )
 
     # Guard: cannot delete the current layer.
     if layer_index == sc.doc.Layers.CurrentLayerIndex:
         raise RuntimeError(
-            f"Cannot delete the current active layer: '{name}'."
+            "Cannot delete the current active layer: '{name}'.".format(name=name)
         )
 
     # Count objects on this layer.
@@ -874,8 +882,10 @@ def delete_layer(params):
     if object_count > 0:
         if not delete_objects:
             raise RuntimeError(
-                f"Layer '{name}' has {object_count} object(s). "
-                "Set delete_objects=True to remove them along with the layer."
+                "Layer '{name}' has {count} object(s). "
+                "Set delete_objects=True to remove them along with the layer.".format(
+                    name=name, count=object_count
+                )
             )
         # Delete objects on the layer first.
         try:
@@ -896,8 +906,8 @@ def delete_layer(params):
     success = sc.doc.Layers.Delete(layer_index, True)
     if not success:
         raise RuntimeError(
-            f"Rhino refused to delete layer '{name}'. "
-            "It may have sub-layers; delete those first."
+            "Rhino refused to delete layer '{name}'. "
+            "It may have sub-layers; delete those first.".format(name=name)
         )
 
     sc.doc.Views.Redraw()
@@ -905,7 +915,7 @@ def delete_layer(params):
     return {
         "success": True,
         "deleted_objects": deleted_objects,
-        "message": f"Layer '{name}' deleted.",
+        "message": "Layer '{name}' deleted.".format(name=name),
     }
 
 
@@ -921,19 +931,19 @@ def set_current_layer(params):
 
     Params
     ------
-    name : str — full layer path (required)
+    name : str -- full layer path (required)
 
     Returns
     -------
     dict with keys:
         success     : bool
-        layer_index : int  — index of the layer that is now current
+        layer_index : int  -- index of the layer that is now current
         full_path   : str
 
     Raises
     ------
-    ValueError   — if name is missing or the layer is not found
-    RuntimeError — if Rhino refuses to set the layer as current (locked/hidden)
+    ValueError   -- if name is missing or the layer is not found
+    RuntimeError -- if Rhino refuses to set the layer as current (locked/hidden)
     """
     name = params.get("name", "")  # type: str
     if not name:
@@ -945,7 +955,7 @@ def set_current_layer(params):
     layer_index = sc.doc.Layers.FindByFullPath(str(name), -1)
     if layer_index < 0:
         raise ValueError(
-            f"Layer not found: '{name}'"
+            "Layer not found: '{name}'".format(name=name)
         )
 
     # Rhino requires the target layer to be visible and unlocked.
@@ -954,7 +964,7 @@ def set_current_layer(params):
     try:
         if not layer.IsVisible:
             raise RuntimeError(
-                f"Cannot set a hidden layer as current: '{name}'."
+                "Cannot set a hidden layer as current: '{name}'.".format(name=name)
             )
     except RuntimeError:
         raise
@@ -964,7 +974,7 @@ def set_current_layer(params):
     try:
         if layer.IsLocked:
             raise RuntimeError(
-                f"Cannot set a locked layer as current: '{name}'."
+                "Cannot set a locked layer as current: '{name}'.".format(name=name)
             )
     except RuntimeError:
         raise

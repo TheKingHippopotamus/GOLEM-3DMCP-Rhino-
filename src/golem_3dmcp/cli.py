@@ -281,7 +281,7 @@ def config() -> None:
   "mcpServers": {
     "golem-3dmcp": {
       "command": "uvx",
-      "args": ["golem-3dmcp"]
+      "args": ["--from", "golem-3dmcp", "golem", "start"]
     }
   }
 }'''

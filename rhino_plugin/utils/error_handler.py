@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/utils/error_handler.py
 =====================================
@@ -6,8 +7,8 @@ exceptions into structured GOLEM error dicts.
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax.
-* Zero external dependencies — only Python stdlib.
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax.
+* Zero external dependencies -- only Python stdlib.
 * :func:`wrap_handler` is intended to wrap individual handler functions
   **before** they are registered in the dispatcher so that every handler
   automatically produces consistent error responses without boilerplate.
@@ -23,7 +24,10 @@ Error dict schema::
 
 import functools
 import traceback
-from typing import Any, Callable, Dict, Optional
+try:
+    from typing import Any, Callable, Dict, Optional
+except ImportError:
+    pass
 
 
 # ---------------------------------------------------------------------------
@@ -101,7 +105,7 @@ def make_error(code, message, details=None):
     message:
         Human-readable description of the error.
     details:
-        Optional extra context — a stack trace string, a field name, the
+        Optional extra context -- a stack trace string, a field name, the
         invalid value, etc.  Must be JSON-serialisable.
 
     Returns

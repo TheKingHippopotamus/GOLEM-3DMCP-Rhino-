@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/surfaces.py
 ===================================
@@ -10,7 +11,7 @@ planar_surface.
 Design notes
 ------------
 * Runs INSIDE Rhino 3D under Python 3.9.
-* Zero external dependencies — only Python stdlib + Rhino/RhinoCommon APIs.
+* Zero external dependencies -- only Python stdlib + Rhino/RhinoCommon APIs.
 * Python 3.9 compatible: no ``match``/``case``, no ``X | Y`` union syntax,
   no lowercase ``dict[...]`` / ``list[...]`` generics in annotations.
 * Every handler is registered via ``@handler("surfaces.<name>")`` from
@@ -20,7 +21,7 @@ Design notes
 * GUID validation delegates to
   :class:`~rhino_plugin.utils.guid_registry.GuidRegistry`, whose
   :meth:`validate_guid` / :meth:`validate_guids` raise ``KeyError`` (message
-  contains ``"not found"``) when an object is absent — the dispatcher maps
+  contains ``"not found"``) when an object is absent -- the dispatcher maps
   this to ``OBJECT_NOT_FOUND``.
 * Bounding-box serialisation uses
   :func:`~rhino_plugin.utils.geometry_serializer.serialize_bounding_box`.
@@ -34,16 +35,20 @@ Rhino imports resolved at runtime:
 """
 
 import math
+try:
+    from typing import Any, Dict, List, Optional
+except ImportError:
+    pass
 
 # ---------------------------------------------------------------------------
-# Rhino imports — guarded so linters outside Rhino do not explode.
+# Rhino imports -- guarded so linters outside Rhino do not explode.
 # ---------------------------------------------------------------------------
 
 try:
-    import Rhino  # noqa: F401
+    import Rhino                          # noqa: F401
     import Rhino.Geometry as RG
-    import rhinoscriptsyntax as rs  # noqa: F401
     import scriptcontext as sc
+    import rhinoscriptsyntax as rs        # noqa: F401
     import System
     _RHINO_AVAILABLE = True
 except ImportError:
@@ -54,8 +59,9 @@ except ImportError:
 # ---------------------------------------------------------------------------
 
 from rhino_plugin.dispatcher import handler
-from rhino_plugin.utils.geometry_serializer import serialize_bounding_box
 from rhino_plugin.utils.guid_registry import registry
+from rhino_plugin.utils.geometry_serializer import serialize_bounding_box
+
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -90,12 +96,14 @@ def _get_curve_geometry(guid_str):
     obj = sc.doc.Objects.FindId(sys_guid)
     if obj is None:
         raise KeyError(
-            f"Object not found in Rhino document: '{guid_str}'"
+            "Object not found in Rhino document: '{g}'".format(g=guid_str)
         )
     geom = obj.Geometry
     if not isinstance(geom, RG.Curve):
         raise ValueError(
-            f"Object '{guid_str}' is not a Curve (got {type(geom).__name__})."
+            "Object '{g}' is not a Curve (got {t}).".format(
+                g=guid_str, t=type(geom).__name__
+            )
         )
     return geom
 
@@ -117,12 +125,14 @@ def _get_brep_geometry(guid_str):
     obj = sc.doc.Objects.FindId(sys_guid)
     if obj is None:
         raise KeyError(
-            f"Object not found in Rhino document: '{guid_str}'"
+            "Object not found in Rhino document: '{g}'".format(g=guid_str)
         )
     geom = obj.Geometry
     if not isinstance(geom, RG.Brep):
         raise ValueError(
-            f"Object '{guid_str}' is not a Brep (got {type(geom).__name__})."
+            "Object '{g}' is not a Brep (got {t}).".format(
+                g=guid_str, t=type(geom).__name__
+            )
         )
     return geom
 
@@ -169,11 +179,11 @@ def _require_list(params, key):
     val = params.get(key)
     if not isinstance(val, list):
         raise ValueError(
-            f"Parameter '{key}' must be a list of GUID strings."
+            "Parameter '{k}' must be a list of GUID strings.".format(k=key)
         )
     if len(val) == 0:
         raise ValueError(
-            f"Parameter '{key}' must contain at least one GUID."
+            "Parameter '{k}' must contain at least one GUID.".format(k=key)
         )
     return val
 
@@ -184,7 +194,7 @@ def _require_str(params, key):
     val = params.get(key)
     if not isinstance(val, str) or not val.strip():
         raise ValueError(
-            f"Parameter '{key}' must be a non-empty GUID string."
+            "Parameter '{k}' must be a non-empty GUID string.".format(k=key)
         )
     return val
 
@@ -200,13 +210,13 @@ def _opt_xyz(params, key):
         return None
     if not (isinstance(val, (list, tuple)) and len(val) == 3):
         raise ValueError(
-            f"Parameter '{key}' must be a list [x, y, z]."
+            "Parameter '{k}' must be a list [x, y, z].".format(k=key)
         )
     try:
         return RG.Point3d(float(val[0]), float(val[1]), float(val[2]))
     except (TypeError, ValueError):
         raise ValueError(
-            f"Parameter '{key}' values must be numeric."
+            "Parameter '{k}' values must be numeric.".format(k=key)
         )
 
 
@@ -216,7 +226,7 @@ def _req_xyz_point(params, key):
     pt = _opt_xyz(params, key)
     if pt is None:
         raise ValueError(
-            f"Required parameter '{key}' ([x, y, z]) is missing."
+            "Required parameter '{k}' ([x, y, z]) is missing.".format(k=key)
         )
     return pt
 
@@ -267,7 +277,9 @@ def loft(params):
     loft_type_str = str(params.get("loft_type", "normal")).lower()
     if loft_type_str not in _LOFT_TYPE_MAP:
         raise ValueError(
-            f"Unknown loft_type '{loft_type_str}'. Valid values: {list(_LOFT_TYPE_MAP.keys())}."
+            "Unknown loft_type '{t}'. Valid values: {v}.".format(
+                t=loft_type_str, v=list(_LOFT_TYPE_MAP.keys())
+            )
         )
     loft_type_int = _LOFT_TYPE_MAP[loft_type_str]
 
@@ -307,7 +319,7 @@ def loft(params):
         from rhino_plugin.utils.error_handler import ErrorCode, make_error
         return make_error(
             ErrorCode.OPERATION_FAILED,
-            f"rs.AddLoftSrf failed: {exc}",
+            "rs.AddLoftSrf failed: {exc}".format(exc=exc),
         )
 
     if not result_ids:
@@ -374,7 +386,7 @@ def sweep1(params):
         from rhino_plugin.utils.error_handler import ErrorCode, make_error
         return make_error(
             ErrorCode.OPERATION_FAILED,
-            f"Brep.CreateFromSweep (1-rail) failed: {exc}",
+            "Brep.CreateFromSweep (1-rail) failed: {exc}".format(exc=exc),
         )
 
     if not breps or len(breps) == 0:
@@ -457,7 +469,7 @@ def sweep2(params):
         from rhino_plugin.utils.error_handler import ErrorCode, make_error
         return make_error(
             ErrorCode.OPERATION_FAILED,
-            f"Brep.CreateFromSweep (2-rail) failed: {exc}",
+            "Brep.CreateFromSweep (2-rail) failed: {exc}".format(exc=exc),
         )
 
     if not breps or len(breps) == 0:
@@ -529,7 +541,7 @@ def revolve(params):
     if start_angle == end_angle:
         raise ValueError(
             "start_angle and end_angle must differ "
-            f"(got both as {start_angle})."
+            "(got both as {a}).".format(a=start_angle)
         )
 
     registry.validate_guid(curve_id)
@@ -547,7 +559,7 @@ def revolve(params):
         from rhino_plugin.utils.error_handler import ErrorCode, make_error
         return make_error(
             ErrorCode.OPERATION_FAILED,
-            f"rs.AddRevSrf failed: {exc}",
+            "rs.AddRevSrf failed: {exc}".format(exc=exc),
         )
 
     if result_id is None:
@@ -618,7 +630,7 @@ def extrude_curve(params):
     result_id = None
 
     if direction_raw is not None:
-        # Direction mode — build a straight extrusion vector.
+        # Direction mode -- build a straight extrusion vector.
         if not (isinstance(direction_raw, (list, tuple)) and len(direction_raw) == 3):
             raise ValueError("'direction' must be a list [x, y, z].")
         dx, dy, dz = (float(v) for v in direction_raw)
@@ -641,10 +653,10 @@ def extrude_curve(params):
             from rhino_plugin.utils.error_handler import ErrorCode, make_error
             return make_error(
                 ErrorCode.OPERATION_FAILED,
-                f"rs.ExtrudeCurveStraight failed: {exc}",
+                "rs.ExtrudeCurveStraight failed: {exc}".format(exc=exc),
             )
     else:
-        # Path mode — extrude along an existing curve.
+        # Path mode -- extrude along an existing curve.
         registry.validate_guid(path_id)
         try:
             result_id = rs.ExtrudeCurve(curve_id, path_id)
@@ -652,7 +664,7 @@ def extrude_curve(params):
             from rhino_plugin.utils.error_handler import ErrorCode, make_error
             return make_error(
                 ErrorCode.OPERATION_FAILED,
-                f"rs.ExtrudeCurve failed: {exc}",
+                "rs.ExtrudeCurve failed: {exc}".format(exc=exc),
             )
 
     if result_id is None:
@@ -752,7 +764,7 @@ def extrude_surface(params):
         from rhino_plugin.utils.error_handler import ErrorCode, make_error
         return make_error(
             ErrorCode.OPERATION_FAILED,
-            f"rs.ExtrudeSurface failed: {exc}",
+            "rs.ExtrudeSurface failed: {exc}".format(exc=exc),
         )
     finally:
         # Always clean up the temporary path curve.
@@ -808,7 +820,7 @@ def network_surface(params):
     if continuity not in (0, 1, 2):
         raise ValueError(
             "'continuity' must be 0 (position), 1 (tangent), or 2 (curvature). "
-            f"Got {continuity}."
+            "Got {c}.".format(c=continuity)
         )
 
     registry.validate_guids(curves_u_ids)
@@ -848,13 +860,13 @@ def network_surface(params):
             from rhino_plugin.utils.error_handler import ErrorCode, make_error
             return make_error(
                 ErrorCode.OPERATION_FAILED,
-                f"NurbsSurface.CreateNetworkSurface failed: {exc2}",
+                "NurbsSurface.CreateNetworkSurface failed: {exc}".format(exc=exc2),
             )
     except Exception as exc:
         from rhino_plugin.utils.error_handler import ErrorCode, make_error
         return make_error(
             ErrorCode.OPERATION_FAILED,
-            f"NurbsSurface.CreateNetworkSurface failed: {exc}",
+            "NurbsSurface.CreateNetworkSurface failed: {exc}".format(exc=exc),
         )
 
     if nurbs_srf is None:
@@ -924,7 +936,7 @@ def patch(params):
         from rhino_plugin.utils.error_handler import ErrorCode, make_error
         return make_error(
             ErrorCode.OPERATION_FAILED,
-            f"rs.AddPatch failed: {exc}",
+            "rs.AddPatch failed: {exc}".format(exc=exc),
         )
 
     if result_id is None:
@@ -967,7 +979,7 @@ def edge_surface(params):
     if len(curve_ids) < 2 or len(curve_ids) > 4:
         raise ValueError(
             "edge_surface requires 2, 3, or 4 curves in 'curve_ids' "
-            f"(got {len(curve_ids)})."
+            "(got {n}).".format(n=len(curve_ids))
         )
 
     registry.validate_guids(curve_ids)
@@ -978,7 +990,7 @@ def edge_surface(params):
         from rhino_plugin.utils.error_handler import ErrorCode, make_error
         return make_error(
             ErrorCode.OPERATION_FAILED,
-            f"rs.AddEdgeSrf failed: {exc}",
+            "rs.AddEdgeSrf failed: {exc}".format(exc=exc),
         )
 
     if result_id is None:
@@ -1027,14 +1039,14 @@ def cap_planar_holes(params):
         from rhino_plugin.utils.error_handler import ErrorCode, make_error
         return make_error(
             ErrorCode.OPERATION_FAILED,
-            f"rs.CapPlanarHoles failed: {exc}",
+            "rs.CapPlanarHoles failed: {exc}".format(exc=exc),
         )
 
     # rs.CapPlanarHoles returns None if no holes could be capped or if the
     # operation failed.  In that case we still return the original GUID so the
     # caller is not left empty-handed; but we signal the condition via a flag.
     if result_id is None:
-        # Not necessarily a hard failure — the brep may have had no planar
+        # Not necessarily a hard failure -- the brep may have had no planar
         # holes. Return the original GUID and flag it.
         sc.doc.Views.Redraw()
         return {
@@ -1092,7 +1104,7 @@ def unroll(params):
     obj = sc.doc.Objects.FindId(sys_guid)
     if obj is None:
         raise KeyError(
-            f"Object not found in Rhino document: '{surface_id}'"
+            "Object not found in Rhino document: '{g}'".format(g=surface_id)
         )
 
     geom = obj.Geometry
@@ -1113,14 +1125,16 @@ def unroll(params):
             breps_to_unroll.append(brep)
     else:
         raise ValueError(
-            f"Object '{surface_id}' is not a Surface or Brep (got {type(geom).__name__})."
+            "Object '{g}' is not a Surface or Brep (got {t}).".format(
+                g=surface_id, t=type(geom).__name__
+            )
         )
 
     if not breps_to_unroll:
         from rhino_plugin.utils.error_handler import ErrorCode, make_error
         return make_error(
             ErrorCode.OPERATION_FAILED,
-            f"Could not extract any faces to unroll from '{surface_id}'.",
+            "Could not extract any faces to unroll from '{g}'.".format(g=surface_id),
         )
 
     added_guids = []
@@ -1137,7 +1151,7 @@ def unroll(params):
             from rhino_plugin.utils.error_handler import ErrorCode, make_error
             return make_error(
                 ErrorCode.OPERATION_FAILED,
-                f"Unroller.PerformUnroll failed: {exc}",
+                "Unroller.PerformUnroll failed: {exc}".format(exc=exc),
             )
 
         for srf in unrolled_surfaces:
@@ -1207,7 +1221,7 @@ def planar_surface(params):
         from rhino_plugin.utils.error_handler import ErrorCode, make_error
         return make_error(
             ErrorCode.OPERATION_FAILED,
-            f"rs.AddPlanarSrf failed: {exc}",
+            "rs.AddPlanarSrf failed: {exc}".format(exc=exc),
         )
 
     if not result_ids:

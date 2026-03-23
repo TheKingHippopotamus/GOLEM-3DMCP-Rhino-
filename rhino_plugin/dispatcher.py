@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/dispatcher.py
 ==========================
@@ -9,16 +10,19 @@ or discovered automatically via :func:`register_handlers_from_module`.
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax,
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax,
   no ``dict[str, ...]`` lowercase generics in runtime annotations.
-* Zero external dependencies — only Python stdlib.
+* Zero external dependencies -- only Python stdlib.
 * Every public function that touches the registry is thread-safe enough for
   Rhino's single-threaded Python environment; a real lock can be added if
   Rhino ever exposes multi-threaded execution contexts.
 """
 
 import traceback
-from typing import Any, Callable, Dict, List, Optional
+try:
+    from typing import Any, Callable, Dict, List, Optional
+except ImportError:
+    pass
 
 
 # ---------------------------------------------------------------------------
@@ -200,7 +204,7 @@ def dispatch(method, params, request_id=None):
 
     except (ValueError, TypeError, KeyError) as exc:
         # Surface parameter validation errors without a full traceback in the
-        # message — callers receive enough information to fix their input.
+        # message -- callers receive enough information to fix their input.
         return error_response(
             request_id,
             ErrorCode.INVALID_PARAMS,

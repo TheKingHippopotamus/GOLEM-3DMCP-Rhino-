@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/server.py
 ======================
@@ -28,7 +29,10 @@ import json
 import socket
 import threading
 import traceback
-from typing import Optional, Callable, Any
+try:
+    from typing import Optional, Callable, Any
+except ImportError:
+    pass
 
 # Rhino-specific imports.  These are available inside Rhino's IronPython /
 # Python 3.9 runtime.  The TYPE_CHECKING guard allows IDEs to resolve the
@@ -191,14 +195,14 @@ def handle_client(conn, addr):
             "params": <dict>       // Method parameters (may be empty dict)
         }
 
-    Message protocol (response — success):
+    Message protocol (response -- success):
         {
             "id":     <str|int>,
             "result": <dict>,
             "error":  null
         }
 
-    Message protocol (response — error):
+    Message protocol (response -- error):
         {
             "id":     <str|int|null>,
             "result": null,
@@ -296,7 +300,7 @@ def _dispatch(method, params, request_id):
         # registered Rhino-specific commands.
         try:
             from rhino_plugin import dispatcher as _dispatcher  # type: ignore
-            # The external dispatcher never raises — it returns its own full
+            # The external dispatcher never raises -- it returns its own full
             # response envelope ({"jsonrpc": "2.0", "id": ..., "result"|"error": ...}).
             # We run it on the UI thread and then normalise its output into our
             # wire envelope format.
@@ -379,7 +383,7 @@ def start_server(host="127.0.0.1", port=9876):
 
         # Register all domain-specific handler modules (scene, creation,
         # operations, surfaces, manipulation, grasshopper, viewport, files,
-        # scripting).  This is idempotent — calling it multiple times is safe.
+        # scripting).  This is idempotent -- calling it multiple times is safe.
         try:
             from rhino_plugin.handlers import register_all_handlers
             handler_count = register_all_handlers()
@@ -388,7 +392,7 @@ def start_server(host="127.0.0.1", port=9876):
             # Non-fatal: the server can still start and serve built-in methods.
             # Individual unregistered domain methods will return NOT_FOUND.
             _log(
-                "GOLEM-3DMCP: WARNING — handler registration failed: {exc}".format(
+                "GOLEM-3DMCP: WARNING -- handler registration failed: {exc}".format(
                     exc=_reg_exc
                 )
             )
@@ -401,7 +405,7 @@ def start_server(host="127.0.0.1", port=9876):
         try:
             srv.bind((host, port))
         except OSError as exc:
-            _log("GOLEM-3DMCP: Failed to bind {host}:{port} — {exc}".format(
+            _log("GOLEM-3DMCP: Failed to bind {host}:{port} -- {exc}".format(
                 host=host, port=port, exc=exc))
             srv.close()
             raise

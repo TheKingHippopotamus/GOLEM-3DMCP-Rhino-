@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/utils/guid_registry.py
 =====================================
@@ -6,10 +7,10 @@ optional metadata (name aliases, type labels) with them.
 
 Design notes
 ------------
-* Python 3.9 compatible — no ``match``/``case``, no ``X | Y`` union syntax.
-* Zero external dependencies — only Python stdlib.
+* Python 3.9 compatible -- no ``match``/``case``, no ``X | Y`` union syntax.
+* Zero external dependencies -- only Python stdlib.
 * Runs inside Rhino 3D; ``scriptcontext`` and ``System`` are available there.
-* The registry is intentionally an in-memory dict — it is NOT persisted across
+* The registry is intentionally an in-memory dict -- it is NOT persisted across
   Rhino sessions.  It is meant as a fast look-up cache for the current session.
 
 Usage example::
@@ -22,7 +23,10 @@ Usage example::
 """
 
 import datetime
-from typing import Dict, List, Optional
+try:
+    from typing import Dict, List, Optional
+except ImportError:
+    pass
 
 try:
     import scriptcontext as sc
@@ -169,7 +173,7 @@ class GuidRegistry:
         Check whether *guid* refers to an object that currently exists in the
         active Rhino document.
 
-        This does NOT require the GUID to be in the local registry — it
+        This does NOT require the GUID to be in the local registry -- it
         queries the Rhino document directly.
 
         Returns
@@ -280,6 +284,6 @@ class GuidRegistry:
             return False
 
 
-# Module-level singleton — import and use directly:
+# Module-level singleton -- import and use directly:
 #   from rhino_plugin.utils.guid_registry import registry
 registry = GuidRegistry()

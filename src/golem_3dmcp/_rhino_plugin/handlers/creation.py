@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/handlers/creation.py
 ==================================
@@ -12,7 +13,7 @@ Python 3.9 compatibility
 * No ``match``/``case`` statements.
 * No ``X | Y`` union type syntax.
 * No lowercase ``dict[...]`` / ``list[...]`` generics in runtime annotations.
-* Zero external dependencies — only Python stdlib + Rhino APIs.
+* Zero external dependencies -- only Python stdlib + Rhino APIs.
 
 Wire method names (must match ``mcp_server/tools/creation.py`` exactly):
     creation.create_box
@@ -30,18 +31,23 @@ Wire method names (must match ``mcp_server/tools/creation.py`` exactly):
 """
 
 import math
+try:
+    from typing import Any, Dict, List, Optional, Union
+except ImportError:
+    pass
 
 try:
-    import Rhino  # noqa: F401
-    import Rhino.Geometry as RG  # noqa: F401
-    import rhinoscriptsyntax as rs  # noqa: F401
-    import scriptcontext as sc  # noqa: F401
-    import System  # noqa: F401
+    import Rhino                                   # noqa: F401
+    import Rhino.Geometry as RG                    # noqa: F401
+    import scriptcontext as sc                     # noqa: F401
+    import rhinoscriptsyntax as rs                 # noqa: F401
+    import System                                  # noqa: F401
     _RHINO_AVAILABLE = True
 except ImportError:
     _RHINO_AVAILABLE = False
 
 from rhino_plugin.dispatcher import handler
+
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -58,7 +64,9 @@ def _resolve_layer_index(layer_name):
     idx = sc.doc.Layers.FindByFullPath(str(layer_name), -1)
     if idx < 0:
         raise ValueError(
-            f"Layer not found: '{layer_name}'.  Create it first with scene.create_layer."
+            "Layer not found: '{layer}'.  Create it first with scene.create_layer.".format(
+                layer=layer_name
+            )
         )
     return idx
 
@@ -93,12 +101,12 @@ def create_box(params):
 
     Params
     ------
-    corner_x, corner_y, corner_z : float — minimum corner (default 0)
-    width   : float — X dimension (default 1)
-    depth   : float — Y dimension (default 1)
-    height  : float — Z dimension (default 1)
-    layer   : str   — optional layer full path
-    name    : str   — optional object name
+    corner_x, corner_y, corner_z : float -- minimum corner (default 0)
+    width   : float -- X dimension (default 1)
+    depth   : float -- Y dimension (default 1)
+    height  : float -- Z dimension (default 1)
+    layer   : str   -- optional layer full path
+    name    : str   -- optional object name
 
     Returns
     -------
@@ -150,10 +158,10 @@ def create_sphere(params):
 
     Params
     ------
-    center_x, center_y, center_z : float — sphere centre (default 0)
-    radius : float — sphere radius (default 1)
-    layer  : str   — optional layer full path
-    name   : str   — optional object name
+    center_x, center_y, center_z : float -- sphere centre (default 0)
+    radius : float -- sphere radius (default 1)
+    layer  : str   -- optional layer full path
+    name   : str   -- optional object name
 
     Returns
     -------
@@ -196,12 +204,12 @@ def create_cylinder(params):
 
     Params
     ------
-    base_x, base_y, base_z : float — centre of the base circle (default 0)
-    radius : float — cylinder radius (default 1)
-    height : float — cylinder height along Z (default 1)
-    cap    : bool  — cap both ends (default True)
-    layer  : str   — optional layer full path
-    name   : str   — optional object name
+    base_x, base_y, base_z : float -- centre of the base circle (default 0)
+    radius : float -- cylinder radius (default 1)
+    height : float -- cylinder height along Z (default 1)
+    cap    : bool  -- cap both ends (default True)
+    layer  : str   -- optional layer full path
+    name   : str   -- optional object name
 
     Returns
     -------
@@ -250,12 +258,12 @@ def create_cone(params):
 
     Params
     ------
-    base_x, base_y, base_z : float — centre of the base circle (default 0)
-    radius : float — base radius (default 1)
-    height : float — cone height (default 1)
-    cap    : bool  — cap the base (default True)
-    layer  : str   — optional layer full path
-    name   : str   — optional object name
+    base_x, base_y, base_z : float -- centre of the base circle (default 0)
+    radius : float -- base radius (default 1)
+    height : float -- cone height (default 1)
+    cap    : bool  -- cap the base (default True)
+    layer  : str   -- optional layer full path
+    name   : str   -- optional object name
 
     Returns
     -------
@@ -303,11 +311,11 @@ def create_torus(params):
 
     Params
     ------
-    center_x, center_y, center_z : float — torus centre (default 0)
-    major_radius : float — distance from torus centre to tube centre (default 2)
-    minor_radius : float — tube radius (default 0.5)
-    layer        : str   — optional layer full path
-    name         : str   — optional object name
+    center_x, center_y, center_z : float -- torus centre (default 0)
+    major_radius : float -- distance from torus centre to tube centre (default 2)
+    minor_radius : float -- tube radius (default 0.5)
+    layer        : str   -- optional layer full path
+    name         : str   -- optional object name
 
     Returns
     -------
@@ -358,10 +366,10 @@ def create_line(params):
 
     Params
     ------
-    start_x, start_y, start_z : float — start point (default 0)
-    end_x,   end_y,   end_z   : float — end point (default 1 on X)
-    layer : str  — optional layer full path
-    name  : str  — optional object name
+    start_x, start_y, start_z : float -- start point (default 0)
+    end_x,   end_y,   end_z   : float -- end point (default 1 on X)
+    layer : str  -- optional layer full path
+    name  : str  -- optional object name
 
     Returns
     -------
@@ -405,10 +413,10 @@ def create_circle(params):
 
     Params
     ------
-    center_x, center_y, center_z : float — circle centre (default 0)
-    radius : float — circle radius (default 1)
-    layer  : str   — optional layer full path
-    name   : str   — optional object name
+    center_x, center_y, center_z : float -- circle centre (default 0)
+    radius : float -- circle radius (default 1)
+    layer  : str   -- optional layer full path
+    name   : str   -- optional object name
 
     Returns
     -------
@@ -448,12 +456,12 @@ def create_arc(params):
 
     Params
     ------
-    center_x, center_y, center_z : float — arc centre (default 0)
-    radius      : float — arc radius (default 1)
-    start_angle : float — start angle in degrees (default 0)
-    end_angle   : float — end angle in degrees (default 90)
-    layer : str  — optional layer full path
-    name  : str  — optional object name
+    center_x, center_y, center_z : float -- arc centre (default 0)
+    radius      : float -- arc radius (default 1)
+    start_angle : float -- start angle in degrees (default 0)
+    end_angle   : float -- end angle in degrees (default 90)
+    layer : str  -- optional layer full path
+    name  : str  -- optional object name
 
     Returns
     -------
@@ -504,10 +512,10 @@ def create_polyline(params):
 
     Params
     ------
-    points : list of {x, y, z} dicts — at least 2 required
-    closed : bool — close the polyline (default False)
-    layer  : str  — optional layer full path
-    name   : str  — optional object name
+    points : list of {x, y, z} dicts -- at least 2 required
+    closed : bool -- close the polyline (default False)
+    layer  : str  -- optional layer full path
+    name   : str  -- optional object name
 
     Returns
     -------
@@ -535,7 +543,7 @@ def create_polyline(params):
             ))
         except Exception as exc:
             raise ValueError(
-                f"Invalid point at index {i}: {exc}"
+                "Invalid point at index {i}: {exc}".format(i=i, exc=exc)
             )
 
     if closed and pts[0].DistanceTo(pts[-1]) > 1e-10:
@@ -559,10 +567,10 @@ def create_nurbs_curve(params):
 
     Params
     ------
-    control_points : list of {x, y, z} dicts — at least 2 required
-    degree         : int  — curve degree (default 3; clamped to 1..11)
-    layer          : str  — optional layer full path
-    name           : str  — optional object name
+    control_points : list of {x, y, z} dicts -- at least 2 required
+    degree         : int  -- curve degree (default 3; clamped to 1..11)
+    layer          : str  -- optional layer full path
+    name           : str  -- optional object name
 
     Returns
     -------
@@ -592,7 +600,7 @@ def create_nurbs_curve(params):
             ))
         except Exception as exc:
             raise ValueError(
-                f"Invalid control point at index {i}: {exc}"
+                "Invalid control point at index {i}: {exc}".format(i=i, exc=exc)
             )
 
     # Clamp degree to number of points minus 1.
@@ -623,9 +631,9 @@ def create_point(params):
 
     Params
     ------
-    x, y, z : float — point coordinates (default 0)
-    layer   : str   — optional layer full path
-    name    : str   — optional object name
+    x, y, z : float -- point coordinates (default 0)
+    layer   : str   -- optional layer full path
+    name    : str   -- optional object name
 
     Returns
     -------
@@ -659,14 +667,14 @@ def create_text(params):
 
     Params
     ------
-    text           : str   — text content (required)
-    x, y, z        : float — insertion point (default 0)
-    height         : float — text height in model units (default 1)
-    font           : str   — font face name (default "Arial")
-    bold           : bool  — bold weight (default False)
-    italic         : bool  — italic style (default False)
-    layer          : str   — optional layer full path
-    name           : str   — optional object name
+    text           : str   -- text content (required)
+    x, y, z        : float -- insertion point (default 0)
+    height         : float -- text height in model units (default 1)
+    font           : str   -- font face name (default "Arial")
+    bold           : bool  -- bold weight (default False)
+    italic         : bool  -- italic style (default False)
+    layer          : str   -- optional layer full path
+    name           : str   -- optional object name
 
     Returns
     -------
@@ -711,7 +719,7 @@ def create_text(params):
         obj_id = sc.doc.Objects.Add(text_entity)
     except Exception as exc:
         raise RuntimeError(
-            f"Failed to create text annotation: {exc}"
+            "Failed to create text annotation: {exc}".format(exc=exc)
         )
 
     if obj_id == System.Guid.Empty:
@@ -736,14 +744,14 @@ def _pt3d(raw):
     """Accept [x,y,z] list/tuple or {x,y,z} dict → Rhino.Geometry.Point3d."""
     if isinstance(raw, (list, tuple)):
         if len(raw) < 3:
-            raise ValueError(f"Point list needs 3 elements, got {len(raw)}.")
+            raise ValueError("Point list needs 3 elements, got {n}.".format(n=len(raw)))
         return RG.Point3d(float(raw[0]), float(raw[1]), float(raw[2]))
     if isinstance(raw, dict):
         try:
             return RG.Point3d(float(raw["x"]), float(raw["y"]), float(raw["z"]))
         except KeyError as exc:
-            raise ValueError(f"Point dict missing key {exc}.")
-    raise ValueError(f"Expected list or dict for point, got {type(raw).__name__!r}.")
+            raise ValueError("Point dict missing key {k}.".format(k=exc))
+    raise ValueError("Expected list or dict for point, got {t!r}.".format(t=type(raw).__name__))
 
 
 def _plane_param(raw):
@@ -754,7 +762,7 @@ def _plane_param(raw):
     if isinstance(raw, (list, tuple)):
         return RG.Plane(_pt3d(raw), RG.Vector3d.ZAxis)
     if not isinstance(raw, dict):
-        raise ValueError(f"Plane must be a dict, got {type(raw).__name__!r}.")
+        raise ValueError("Plane must be a dict, got {t!r}.".format(t=type(raw).__name__))
     origin = _pt3d(raw.get("origin") or [0.0, 0.0, 0.0])
     if "normal" in raw and raw["normal"] is not None:
         n = raw["normal"]
@@ -776,7 +784,7 @@ def _req(params, key):
     # type: (Dict[str, Any], str) -> Any
     val = params.get(key)
     if val is None:
-        raise ValueError(f"Required parameter '{key}' is missing.")
+        raise ValueError("Required parameter '{k}' is missing.".format(k=key))
     return val
 
 
@@ -878,7 +886,7 @@ def geometry_create_point_cloud(params):
         try:
             cloud.Add(_pt3d(raw))
         except Exception as exc:
-            raise ValueError(f"Invalid point at index {i}: {exc}")
+            raise ValueError("Invalid point at index {i}: {err}".format(i=i, err=exc))
 
     name, layer_idx = _g_attrs(params)
     obj_id = sc.doc.Objects.AddPointCloud(cloud)
@@ -940,7 +948,7 @@ def geometry_create_polyline(params):
         try:
             pts.append(_pt3d(raw))
         except Exception as exc:
-            raise ValueError(f"Invalid point at index {i}: {exc}")
+            raise ValueError("Invalid point at index {i}: {err}".format(i=i, err=exc))
 
     polyline = RG.Polyline(pts)
     name, layer_idx = _g_attrs(params)
@@ -975,14 +983,14 @@ def geometry_create_nurbs_curve(params):
     if not isinstance(raw_pts, (list, tuple)) or len(raw_pts) < 2:
         raise ValueError("'points' must have at least 2 entries.")
     if degree < 1 or degree > 11:
-        raise ValueError(f"'degree' must be 1-11, got {degree}.")
+        raise ValueError("'degree' must be 1-11, got {d}.".format(d=degree))
 
     pts = []
     for i, raw in enumerate(raw_pts):
         try:
             pts.append(_pt3d(raw))
         except Exception as exc:
-            raise ValueError(f"Invalid point at index {i}: {exc}")
+            raise ValueError("Invalid point at index {i}: {err}".format(i=i, err=exc))
 
     degree = min(degree, len(pts) - 1)
     periodic = bool(params.get("periodic", False))
@@ -1001,7 +1009,7 @@ def geometry_create_nurbs_curve(params):
     if knots is not None:
         if len(knots) != nc.Knots.Count:
             raise ValueError(
-                f"'knots' length {len(knots)} must be {nc.Knots.Count}."
+                "'knots' length {kl} must be {ek}.".format(kl=len(knots), ek=nc.Knots.Count)
             )
         for i, k in enumerate(knots):
             nc.Knots[i] = float(k)
@@ -1042,7 +1050,7 @@ def geometry_create_interp_curve(params):
         try:
             pts.append(_pt3d(raw))
         except Exception as exc:
-            raise ValueError(f"Invalid point at index {i}: {exc}")
+            raise ValueError("Invalid point at index {i}: {err}".format(i=i, err=exc))
 
     degree = min(degree, len(pts) - 1)
     curve = RG.Curve.CreateInterpolatedCurve(pts, degree)
@@ -1264,12 +1272,14 @@ def geometry_create_nurbs_surface(params):
         ("degree_v", degree_v, count_v),
     ):
         if val < 1 or val > 11:
-            raise ValueError(f"'{label}' must be 1-11, got {val}.")
+            raise ValueError("'{l}' must be 1-11, got {v}.".format(l=label, v=val))
 
     if count_u < degree_u + 1:
-        raise ValueError(f"count_u ({count_u}) must be >= degree_u+1 ({degree_u + 1}).")
+        raise ValueError("count_u ({c}) must be >= degree_u+1 ({d}).".format(
+            c=count_u, d=degree_u + 1))
     if count_v < degree_v + 1:
-        raise ValueError(f"count_v ({count_v}) must be >= degree_v+1 ({degree_v + 1}).")
+        raise ValueError("count_v ({c}) must be >= degree_v+1 ({d}).".format(
+            c=count_v, d=degree_v + 1))
 
     # Flatten nested grid if needed.
     if (isinstance(raw_pts, (list, tuple)) and len(raw_pts) > 0
@@ -1283,12 +1293,14 @@ def geometry_create_nurbs_surface(params):
     expected = count_u * count_v
     if len(flat_pts) != expected:
         raise ValueError(
-            f"Expected {expected} points for {count_u}x{count_v} surface, got {len(flat_pts)}."
+            "Expected {e} points for {cu}x{cv} surface, got {g}.".format(
+                e=expected, cu=count_u, cv=count_v, g=len(flat_pts)
+            )
         )
 
     weights = params.get("weights")
     if weights is not None and len(weights) != expected:
-        raise ValueError(f"'weights' length must equal count_u * count_v = {expected}.")
+        raise ValueError("'weights' length must equal count_u * count_v = {e}.".format(e=expected))
 
     is_rational = weights is not None
     ns = RG.NurbsSurface.Create(3, is_rational, degree_u + 1, degree_v + 1, count_u, count_v)
@@ -1304,7 +1316,7 @@ def geometry_create_nurbs_surface(params):
                 ns.Points.SetControlPoint(i, j, RG.ControlPoint(pt, w))
             except Exception as exc:
                 raise ValueError(
-                    f"Cannot set control point ({i},{j}): {exc}"
+                    "Cannot set control point ({i},{j}): {err}".format(i=i, j=j, err=exc)
                 )
 
     # Uniform knots.
@@ -1392,7 +1404,7 @@ def geometry_create_surface_from_points(params):
         try:
             pts.append(_pt3d(raw))
         except Exception as exc:
-            raise ValueError(f"Invalid point at index {i}: {exc}")
+            raise ValueError("Invalid point at index {i}: {err}".format(i=i, err=exc))
 
     if len(pts) == 3:
         brep = RG.Brep.CreateFromCornerPoints(pts[0], pts[1], pts[2], pts[2], 1e-6)
@@ -1443,7 +1455,7 @@ def geometry_create_box(params):
             try:
                 corners.append(_pt3d(raw))
             except Exception as exc:
-                raise ValueError(f"Invalid corner at index {i}: {exc}")
+                raise ValueError("Invalid corner at index {i}: {err}".format(i=i, err=exc))
         box_geo = RG.Box(RG.Plane.WorldXY, corners)
         brep = RG.Brep.CreateFromBox(box_geo)
         if brep is None:
@@ -1468,10 +1480,7 @@ def geometry_create_box(params):
         corner = _pt3d(_req(params, "corner"))
         plane = RG.Plane(corner, RG.Vector3d.XAxis, RG.Vector3d.YAxis)
 
-    box_geo = RG.Box(
-        plane, RG.Interval(0.0, width), RG.Interval(0.0, depth),
-        RG.Interval(0.0, height),
-    )
+    box_geo = RG.Box(plane, RG.Interval(0.0, width), RG.Interval(0.0, depth), RG.Interval(0.0, height))
     brep = box_geo.ToBrep()
     if brep is None:
         raise RuntimeError("Box.ToBrep returned None.")
@@ -1671,7 +1680,7 @@ def geometry_create_pipe(params):
     sys_guid = System.Guid(curve_id)
     doc_obj = sc.doc.Objects.FindId(sys_guid)
     if doc_obj is None:
-        raise KeyError(f"Object not found in Rhino document: '{curve_id}'")
+        raise KeyError("Object not found in Rhino document: '{g}'".format(g=curve_id))
 
     crv = doc_obj.Geometry
     dom = crv.Domain
@@ -1747,11 +1756,11 @@ def geometry_create_extrusion(params):
     sys_guid = System.Guid(curve_id)
     doc_obj = sc.doc.Objects.FindId(sys_guid)
     if doc_obj is None:
-        raise KeyError(f"Object not found in Rhino document: '{curve_id}'")
+        raise KeyError("Object not found in Rhino document: '{g}'".format(g=curve_id))
 
     profile_crv = doc_obj.Geometry
     if not isinstance(profile_crv, RG.Curve):
-        raise ValueError(f"Object '{curve_id}' is not a curve.")
+        raise ValueError("Object '{g}' is not a curve.".format(g=curve_id))
 
     if "direction" in params and params["direction"] is not None:
         raw_d = params["direction"]
@@ -1846,18 +1855,20 @@ def geometry_create_mesh(params):
             pt = _pt3d(raw)
             mesh.Vertices.Add(pt.X, pt.Y, pt.Z)
         except Exception as exc:
-            raise ValueError(f"Invalid vertex at index {i}: {exc}")
+            raise ValueError("Invalid vertex at index {i}: {err}".format(i=i, err=exc))
 
     vertex_count = len(raw_verts)
     for i, face in enumerate(raw_faces):
         if not isinstance(face, (list, tuple)) or len(face) not in (3, 4):
             raise ValueError(
-                f"Face {i} must have 3 or 4 vertex indices, got {face!r}."
+                "Face {i} must have 3 or 4 vertex indices, got {f!r}.".format(i=i, f=face)
             )
         for fi, idx in enumerate(face):
             if int(idx) < 0 or int(idx) >= vertex_count:
                 raise ValueError(
-                    f"Face {i}: index {idx} at pos {fi} is out of range (max {vertex_count - 1})."
+                    "Face {i}: index {idx} at pos {fi} is out of range (max {m}).".format(
+                        i=i, idx=idx, fi=fi, m=vertex_count - 1
+                    )
                 )
         if len(face) == 3:
             mesh.Faces.AddFace(int(face[0]), int(face[1]), int(face[2]))
@@ -1873,7 +1884,7 @@ def geometry_create_mesh(params):
                 v = _pt3d(raw_n)
                 mesh.Normals.Add(float(v.X), float(v.Y), float(v.Z))
             except Exception as exc:
-                raise ValueError(f"Invalid normal at index {i}: {exc}")
+                raise ValueError("Invalid normal at index {i}: {err}".format(i=i, err=exc))
     else:
         mesh.Normals.ComputeNormals()
 
@@ -1884,18 +1895,18 @@ def geometry_create_mesh(params):
         for i, raw_c in enumerate(vertex_colors):
             if not isinstance(raw_c, (list, tuple)) or len(raw_c) < 3:
                 raise ValueError(
-                    f"vertex_color at index {i} must be [r,g,b] or [r,g,b,a]."
+                    "vertex_color at index {i} must be [r,g,b] or [r,g,b,a].".format(i=i)
                 )
             a = int(raw_c[3]) if len(raw_c) >= 4 else 255
             try:
                 c = System.Drawing.Color.FromArgb(a, int(raw_c[0]), int(raw_c[1]), int(raw_c[2]))
                 mesh.VertexColors.Add(c)
             except Exception as exc:
-                raise ValueError(f"Invalid vertex color at index {i}: {exc}")
+                raise ValueError("Invalid vertex color at index {i}: {err}".format(i=i, err=exc))
 
     mesh.Compact()
     if not mesh.IsValid:
-        raise RuntimeError("Constructed Mesh is not valid — check faces and vertices.")
+        raise RuntimeError("Constructed Mesh is not valid -- check faces and vertices.")
 
     name, layer_idx = _g_attrs(params)
     obj_id = sc.doc.Objects.AddMesh(mesh)
@@ -1934,10 +1945,10 @@ def geometry_create_subd(params):
         sys_guid = System.Guid(mesh_id)
         source_obj = sc.doc.Objects.FindId(sys_guid)
         if source_obj is None:
-            raise KeyError(f"Object not found in Rhino document: '{mesh_id}'")
+            raise KeyError("Object not found in Rhino document: '{g}'".format(g=mesh_id))
         source_mesh = source_obj.Geometry
         if not isinstance(source_mesh, RG.Mesh):
-            raise ValueError(f"Object '{mesh_id}' is not a mesh.")
+            raise ValueError("Object '{g}' is not a mesh.".format(g=mesh_id))
         subd = RG.SubD.CreateFromMesh(source_mesh, None)
     elif "vertices" in params and "faces" in params:
         raw_verts = params["vertices"]
@@ -1952,16 +1963,16 @@ def geometry_create_subd(params):
                 pt = _pt3d(raw)
                 temp.Vertices.Add(pt.X, pt.Y, pt.Z)
             except Exception as exc:
-                raise ValueError(f"Invalid vertex at index {i}: {exc}")
+                raise ValueError("Invalid vertex at index {i}: {err}".format(i=i, err=exc))
 
         vc = len(raw_verts)
         for i, face in enumerate(raw_faces):
             if not isinstance(face, (list, tuple)) or len(face) not in (3, 4):
-                raise ValueError(f"Face {i} must have 3 or 4 indices.")
+                raise ValueError("Face {i} must have 3 or 4 indices.".format(i=i))
             for idx in face:
                 if int(idx) < 0 or int(idx) >= vc:
                     raise ValueError(
-                        f"Face {i}: index {idx} out of range."
+                        "Face {i}: index {idx} out of range.".format(i=i, idx=idx)
                     )
             if len(face) == 3:
                 temp.Faces.AddFace(int(face[0]), int(face[1]), int(face[2]))
@@ -2029,7 +2040,7 @@ def geometry_create_text(params):
         text_entity.TextHeight = height
         obj_id = sc.doc.Objects.Add(text_entity)
     except Exception as exc:
-        raise RuntimeError(f"Failed to create text: {exc}")
+        raise RuntimeError("Failed to create text: {err}".format(err=exc))
 
     if obj_id == System.Guid.Empty:
         raise RuntimeError("Rhino refused to add the text object.")
@@ -2089,7 +2100,7 @@ def geometry_create_dimension(params):
     valid_types = ("linear", "aligned", "angular", "radial", "diameter")
     if dim_type not in valid_types:
         raise ValueError(
-            f"'type' must be one of {valid_types}, got '{dim_type}'."
+            "'type' must be one of {vt}, got '{dt}'.".format(vt=valid_types, dt=dim_type)
         )
     if not isinstance(raw_pts, (list, tuple)):
         raise ValueError("'points' must be a list.")
@@ -2102,7 +2113,7 @@ def geometry_create_dimension(params):
     if dim_type in ("linear", "aligned"):
         if len(raw_pts) < 3:
             raise ValueError(
-                f"'{dim_type}' dimension needs 3 points [ref1, ref2, dim_location]."
+                "'{t}' dimension needs 3 points [ref1, ref2, dim_location].".format(t=dim_type)
             )
         pt0 = _pt3d(raw_pts[0])
         pt1 = _pt3d(raw_pts[1])
@@ -2135,7 +2146,7 @@ def geometry_create_dimension(params):
     elif dim_type in ("radial", "diameter"):
         if len(raw_pts) < 2:
             raise ValueError(
-                f"'{dim_type}' dimension needs 2 points [center, point_on_circle]."
+                "'{t}' dimension needs 2 points [center, point_on_circle].".format(t=dim_type)
             )
         center = _pt3d(raw_pts[0])
         pt_on = _pt3d(raw_pts[1])
@@ -2148,7 +2159,7 @@ def geometry_create_dimension(params):
 
     if obj_id == System.Guid.Empty:
         raise RuntimeError(
-            f"Dimension creation failed for type '{dim_type}' — check input points."
+            "Dimension creation failed for type '{t}' -- check input points.".format(t=dim_type)
         )
 
     _set_object_attributes(obj_id, name, layer_idx)
@@ -2187,8 +2198,8 @@ def geometry_create_hatch(params):
     pattern_idx = sc.doc.HatchPatterns.Find(pattern_name, True)
     if pattern_idx < 0:
         raise ValueError(
-            f"Hatch pattern '{pattern_name}' not found in the document. "
-            "Load the pattern first or use a built-in name like 'Solid'."
+            "Hatch pattern '{p}' not found in the document. "
+            "Load the pattern first or use a built-in name like 'Solid'.".format(p=pattern_name)
         )
 
     # Collect boundary curves from the document.
@@ -2197,18 +2208,18 @@ def geometry_create_hatch(params):
         sys_guid = System.Guid(str(cid))
         doc_obj = sc.doc.Objects.FindId(sys_guid)
         if doc_obj is None:
-            raise KeyError(f"Object not found in Rhino document: '{cid}'")
+            raise KeyError("Object not found in Rhino document: '{g}'".format(g=cid))
         crv = doc_obj.Geometry
         if not isinstance(crv, RG.Curve):
-            raise ValueError(f"Object '{cid}' is not a curve.")
+            raise ValueError("Object '{g}' is not a curve.".format(g=cid))
         curves.append(crv)
 
     hatches = RG.Hatch.Create(curves, pattern_idx, rotation_rad, scale, 1e-3)
 
     if hatches is None or len(hatches) == 0:
         raise RuntimeError(
-            "Hatch.Create returned no hatches — verify that boundary curves are "
-            f"closed and planar, and that pattern '{pattern_name}' exists."
+            "Hatch.Create returned no hatches -- verify that boundary curves are "
+            "closed and planar, and that pattern '{p}' exists.".format(p=pattern_name)
         )
 
     name, layer_idx = _g_attrs(params)

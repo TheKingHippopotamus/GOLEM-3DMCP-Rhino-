@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
 """
 rhino_plugin/grasshopper/gh_handlers.py
 =========================================
 Low-level Grasshopper utility functions used by the main handler layer.
 
 These functions sit one step below ``handlers/grasshopper.py``.  They deal
-directly with the Grasshopper object model — serialising components and
-parameters, reading/writing values, and baking geometry — but they do NOT
+directly with the Grasshopper object model -- serialising components and
+parameters, reading/writing values, and baking geometry -- but they do NOT
 register dispatcher handlers or raise JSON-RPC errors.  All errors propagate
 as plain Python exceptions for the caller to handle.
 
@@ -27,7 +28,10 @@ Python 3.9 compatibility
 Author: GOLEM-3DMCP
 """
 
-from typing import Any, Dict, List, Optional
+try:
+    from typing import Any, Dict, List, Optional
+except ImportError:
+    pass
 
 # ---------------------------------------------------------------------------
 # Grasshopper / Rhino availability guard
@@ -108,13 +112,13 @@ def serialize_gh_component(component):
     Returns
     -------
     dict with keys:
-        nickname       : str    — component NickName
-        name           : str    — component Name
-        type           : str    — Python type name of the component class
-        guid           : str    — instance GUID as string
-        position       : dict   — {"x": float, "y": float}
-        input_params   : list   — each entry is a serialised input param dict
-        output_params  : list   — each entry is a serialised output param dict
+        nickname       : str    -- component NickName
+        name           : str    -- component Name
+        type           : str    -- Python type name of the component class
+        guid           : str    -- instance GUID as string
+        position       : dict   -- {"x": float, "y": float}
+        input_params   : list   -- each entry is a serialised input param dict
+        output_params  : list   -- each entry is a serialised output param dict
     """
     result = {
         "nickname": "",
@@ -191,7 +195,7 @@ def serialize_gh_param(component):
 
     Returns
     -------
-    dict — type-specific structure:
+    dict -- type-specific structure:
 
     Slider::
 
@@ -330,17 +334,17 @@ def set_param_value(component, param_name, value):
 
     The function inspects the concrete type of *component* and applies the
     appropriate setter.  *param_name* is accepted for API consistency but is
-    currently unused — the value is applied to the component itself (for
+    currently unused -- the value is applied to the component itself (for
     standalone param components such as sliders, panels, and toggles).
 
     Supports:
-    * ``GH_NumberSlider``  — clamps *value* to [min, max] and calls
+    * ``GH_NumberSlider``  -- clamps *value* to [min, max] and calls
       ``SetSliderValue(Decimal)``
-    * ``GH_Panel``         — sets ``UserText`` string property
-    * ``GH_BooleanToggle`` — sets ``Value`` bool property
-    * Generic ``IGH_Param`` with ``AddVolatileData`` — injects a single
+    * ``GH_Panel``         -- sets ``UserText`` string property
+    * ``GH_BooleanToggle`` -- sets ``Value`` bool property
+    * Generic ``IGH_Param`` with ``AddVolatileData`` -- injects a single
       GH_Number / GH_String via the volatile data mechanism
-    * ``Grasshopper.Kernel.Parameters.Param_Number`` — same mechanism
+    * ``Grasshopper.Kernel.Parameters.Param_Number`` -- same mechanism
 
     Raises
     ------
@@ -506,7 +510,7 @@ def _unwrap_gh_goo(goo):
     Extract the underlying Python / .NET value from a GH_Goo wrapper.
 
     Tries several unwrapping strategies in order:
-    1. ``goo.Value``   — works for GH_Number, GH_Boolean, GH_String, etc.
+    1. ``goo.Value``   -- works for GH_Number, GH_Boolean, GH_String, etc.
     2. ``goo.IsValid`` check + cast to float / str / bool
     3. Fall back to ``str(goo)``
 
@@ -541,7 +545,7 @@ def _unwrap_gh_goo(goo):
     except Exception:
         pass
 
-    # Try geometry — return a compact summary dict.
+    # Try geometry -- return a compact summary dict.
     if _GH_AVAILABLE:
         try:
             if isinstance(value, RG.Point3d):
